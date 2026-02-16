@@ -29,3 +29,4 @@ Once set up, just open your Google Sheet - all submissions will appear there aut
 
 See `GOOGLE_SHEETS_SETUP.md` for detailed step-by-step instructions with screenshots guidance.
 
+

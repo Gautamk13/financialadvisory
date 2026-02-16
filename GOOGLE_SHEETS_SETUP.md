@@ -211,3 +211,4 @@ You need to paste your Google Script URL into two files:
 
 That's it! Your database is now in Google Sheets and accessible from anywhere! 🎉
 
+
