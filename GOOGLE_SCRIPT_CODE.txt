@@ -1,0 +1,109 @@
+// Copy this ENTIRE code into Google Apps Script
+// Make sure to copy everything from function doGet to the closing brace
+
+// This function is for testing - when you open the URL in browser
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'OK',
+    message: 'Google Apps Script is working! Use POST to send data.'
+  }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// This function handles data from your website
+function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSheet();
+    
+    // Check if we have post data
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput(JSON.stringify({error: 'No data received'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = JSON.parse(e.postData.contents);
+    
+    // Handle discovery form submission
+    if (data.type === 'discovery') {
+      sheet.appendRow([
+        data.name || '',
+        data.age || '',
+        data.email || '',
+        data.phone || '',
+        data.service || '',
+        '', // Risk Capacity (empty for now)
+        '', // Risk Behaviour (empty for now)
+        '', // Risk Score (empty for now)
+        '', // Risk Bucket (empty for now)
+        '', // Equity Allocation (empty for now)
+        '', // Debt Allocation (empty for now)
+        '', // Alternatives Allocation (empty for now)
+        data.timestamp || new Date()
+      ]);
+    }
+    
+    // Handle risk assessment submission
+    if (data.type === 'assessment') {
+      // Find the row with matching email
+      const email = data.email;
+      const lastRow = sheet.getLastRow();
+      let rowToUpdate = null;
+      
+      // Search for existing row with this email (starting from row 2, skipping header)
+      if (lastRow > 1) {
+        for (let i = 2; i <= lastRow; i++) {
+          const cellValue = sheet.getRange(i, 3).getValue();
+          if (cellValue && cellValue.toString().trim() === email.toString().trim()) {
+            rowToUpdate = i;
+            break;
+          }
+        }
+      }
+      
+      if (rowToUpdate) {
+        // Update existing row with assessment data
+        sheet.getRange(rowToUpdate, 1).setValue(data.name || '');
+        sheet.getRange(rowToUpdate, 2).setValue(data.age || '');
+        sheet.getRange(rowToUpdate, 3).setValue(data.email || '');
+        sheet.getRange(rowToUpdate, 4).setValue(data.phone || '');
+        sheet.getRange(rowToUpdate, 5).setValue(data.service || '');
+        sheet.getRange(rowToUpdate, 6).setValue(data.riskCapacity || '');
+        sheet.getRange(rowToUpdate, 7).setValue(data.riskBehaviour || '');
+        sheet.getRange(rowToUpdate, 8).setValue(data.riskScore || '');
+        sheet.getRange(rowToUpdate, 9).setValue(data.riskBucket || '');
+        sheet.getRange(rowToUpdate, 10).setValue(data.equityAllocation || '');
+        sheet.getRange(rowToUpdate, 11).setValue(data.debtAllocation || '');
+        sheet.getRange(rowToUpdate, 12).setValue(data.alternativesAllocation || '');
+        sheet.getRange(rowToUpdate, 13).setValue(data.timestamp || new Date());
+      } else {
+        // Create new row if email not found
+        sheet.appendRow([
+          data.name || '',
+          data.age || '',
+          data.email || '',
+          data.phone || '',
+          data.service || '',
+          data.riskCapacity || '',
+          data.riskBehaviour || '',
+          data.riskScore || '',
+          data.riskBucket || '',
+          data.equityAllocation || '',
+          data.debtAllocation || '',
+          data.alternativesAllocation || '',
+          data.timestamp || new Date()
+        ]);
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({success: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      error: error.toString(),
+      message: error.message
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+

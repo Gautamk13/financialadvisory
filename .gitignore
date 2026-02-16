@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+Risk assessment/node_modules/
+
+# Database files
+*.db
+Risk assessment/risk_assessments.db
+
+# Documentation files (optional - you can include these if you want)
+# GOOGLE_SHEETS_SETUP.md
+# DEPLOYMENT_GUIDE.md
+# GOOGLE_SCRIPT_CODE.txt
+# QUICK_START.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+

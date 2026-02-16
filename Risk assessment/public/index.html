@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Assessment Model</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Objective Risk Assessment Model</h1>
+            <p class="subtitle">RIA Compliant • Deterministic • Auditable</p>
+        </header>
+
+        <!-- Personal Information Section -->
+        <section id="personalInfoSection" class="section active">
+            <h2>Personal Information</h2>
+            <form id="personalInfoForm">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <button type="submit" class="btn-primary">Continue to Assessment</button>
+            </form>
+        </section>
+
+        <!-- Assessment Questions Section -->
+        <section id="assessmentSection" class="section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="currentQuestion">0</span> / <span id="totalQuestions">13</span>
+            </div>
+
+            <form id="assessmentForm">
+                <!-- Risk Capacity Questions -->
+                <div class="question-group" data-category="risk-capacity">
+                    <h2>Risk Capacity Assessment</h2>
+                    <p class="section-description">Financial ability to withstand volatility</p>
+
+                    <!-- Q1: Income Stability -->
+                    <div class="question" data-q="1">
+                        <h3>1. What is your employment type?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="incomeStability" value="government_psu" required>
+                                <span>Government / PSU</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="incomeStability" value="large_mnc" required>
+                                <span>Large MNC (Salaried)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="incomeStability" value="stable_sme" required>
+                                <span>Stable SME Job</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="incomeStability" value="startup_unstable" required>
+                                <span>Startup/Private (Unstable)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="incomeStability" value="variable_freelance" required>
+                                <span>Variable/Freelance Income</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q2: Savings Rate -->
+                    <div class="question" data-q="2">
+                        <h3>2. What percentage of your monthly income do you invest/save?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="savingsRate" value="less_10" required>
+                                <span>Less than 10%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="savingsRate" value="10_20" required>
+                                <span>10% - 20%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="savingsRate" value="20_35" required>
+                                <span>20% - 35%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="savingsRate" value="more_35" required>
+                                <span>More than 35%</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q3: Emergency Fund -->
+                    <div class="question" data-q="3">
+                        <h3>3. How many months of expenses do you have in your emergency fund?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="emergencyFund" value="less_3" required>
+                                <span>Less than 3 months</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emergencyFund" value="3_6" required>
+                                <span>3 - 6 months</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emergencyFund" value="6_12" required>
+                                <span>6 - 12 months</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emergencyFund" value="more_12" required>
+                                <span>More than 12 months</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q4: Dependents -->
+                    <div class="question" data-q="4">
+                        <h3>4. How many dependents do you have?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="dependents" value="0" required>
+                                <span>0 (None)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependents" value="1" required>
+                                <span>1</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependents" value="2" required>
+                                <span>2</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependents" value="3_plus" required>
+                                <span>3 or more</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q5: EMI/Income Ratio -->
+                    <div class="question" data-q="5">
+                        <h3>5. What is your EMI (loan payments) to Income ratio?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="emiIncomeRatio" value="less_10" required>
+                                <span>Less than 10%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emiIncomeRatio" value="10_25" required>
+                                <span>10% - 25%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emiIncomeRatio" value="25_40" required>
+                                <span>25% - 40%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="emiIncomeRatio" value="more_40" required>
+                                <span>More than 40%</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q6: Job Replaceability -->
+                    <div class="question" data-q="6">
+                        <h3>6. How long would it take you to find a similar job if you lost your current one?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="jobReplaceability" value="less_2_months" required>
+                                <span>Less than 2 months</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="jobReplaceability" value="3_4_months" required>
+                                <span>3 - 4 months</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="jobReplaceability" value="6_plus_months" required>
+                                <span>6 months or more</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q7: Investment Duration -->
+                    <div class="question" data-q="7">
+                        <h3>7. What is your investment duration/horizon?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="investmentDuration" value="less_3" required>
+                                <span>Less than 3 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentDuration" value="3_5" required>
+                                <span>3 - 5 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentDuration" value="5_10" required>
+                                <span>5 - 10 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentDuration" value="more_10" required>
+                                <span>More than 10 years</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q8: Goal Flexibility -->
+                    <div class="question" data-q="8">
+                        <h3>8. How flexible is your investment goal deadline?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="goalFlexibility" value="fixed" required>
+                                <span>Fixed deadline (cannot be changed)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="goalFlexibility" value="semi_flexible" required>
+                                <span>Semi-flexible (can be adjusted slightly)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="goalFlexibility" value="fully_flexible" required>
+                                <span>Fully flexible (no strict deadline)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Behaviour Questions -->
+                <div class="question-group" data-category="risk-behaviour">
+                    <h2>Risk Behaviour Assessment</h2>
+                    <p class="section-description">Observed investment discipline and behavior</p>
+
+                    <!-- Q9: Budget Tracking -->
+                    <div class="question" data-q="9">
+                        <h3>9. How do you track your budget and expenses?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="budgetTracking" value="none" required>
+                                <span>I don't track my budget</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="budgetTracking" value="occasional" required>
+                                <span>Occasionally (when I remember)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="budgetTracking" value="strict" required>
+                                <span>Strict tracking (regularly maintained)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q10: Investment Consistency -->
+                    <div class="question" data-q="10">
+                        <h3>10. How consistent is your investment habit (SIP/regular investments)?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="investmentConsistency" value="irregular" required>
+                                <span>Irregular (miss many months)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentConsistency" value="sometimes" required>
+                                <span>Sometimes consistent</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentConsistency" value="consistent" required>
+                                <span>Consistent (rarely miss)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q11: Market Reaction -->
+                    <div class="question" data-q="11">
+                        <h3>11. What did you do during the last major market fall/crash?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="marketReaction" value="sold" required>
+                                <span>Sold some or all investments</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="marketReaction" value="held" required>
+                                <span>Held investments (did nothing)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="marketReaction" value="added" required>
+                                <span>Added more investments (bought the dip)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q12: Portfolio Monitoring -->
+                    <div class="question" data-q="12">
+                        <h3>12. How often do you check your investment portfolio?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="portfolioMonitoring" value="daily" required>
+                                <span>Daily (emotional checking)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="portfolioMonitoring" value="monthly" required>
+                                <span>Monthly review</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="portfolioMonitoring" value="periodic" required>
+                                <span>Periodic planned review (quarterly/yearly)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-navigation">
+                    <button type="button" id="prevBtn" class="btn-secondary" style="display: none;">Previous</button>
+                    <button type="button" id="nextBtn" class="btn-primary">Next</button>
+                    <button type="submit" id="submitBtn" class="btn-primary" style="display: none;">Submit Assessment</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="section">
+            <div class="results-container">
+                <div class="results-header">
+                    <h2>Your Risk Assessment Results</h2>
+                    <div class="processing-indicator" id="processingIndicator">
+                        <div class="spinner"></div>
+                        <p>Processing your assessment...</p>
+                    </div>
+                </div>
+
+                <div id="resultsContent" style="display: none;">
+                    <div class="score-card">
+                        <h3>Risk Capacity Score</h3>
+                        <div class="score-value" id="riskCapacityScore">-</div>
+                        <p class="score-label">Financial ability to withstand volatility</p>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Risk Behaviour Score</h3>
+                        <div class="score-value" id="riskBehaviourScore">-</div>
+                        <p class="score-label">Observed investment discipline</p>
+                    </div>
+
+                    <div class="score-card primary">
+                        <h3>Final Risk Score</h3>
+                        <div class="score-value" id="finalScore">-</div>
+                        <p class="score-label">MIN(Risk Capacity, Risk Behaviour)</p>
+                    </div>
+
+                    <div class="risk-bucket-card">
+                        <h3>Your Risk Category</h3>
+                        <div class="bucket-name" id="riskBucket">-</div>
+                    </div>
+
+                    <div class="allocation-card">
+                        <h3>Recommended Asset Allocation</h3>
+                        <div class="allocation-grid">
+                            <div class="allocation-item equity">
+                                <div class="allocation-label">Equity</div>
+                                <div class="allocation-value" id="equityAllocation">-</div>
+                            </div>
+                            <div class="allocation-item debt">
+                                <div class="allocation-label">Debt</div>
+                                <div class="allocation-value" id="debtAllocation">-</div>
+                            </div>
+                            <div class="allocation-item alternatives">
+                                <div class="allocation-label">Gold/Alternatives</div>
+                                <div class="allocation-value" id="alternativesAllocation">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="overridesSection" class="overrides-card" style="display: none;">
+                        <h3>⚠️ Override Warnings</h3>
+                        <ul id="overridesList"></ul>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="location.reload()">Start New Assessment</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+

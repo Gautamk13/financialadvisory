@@ -1,0 +1,6 @@
+node_modules/
+risk_assessments.db
+.DS_Store
+*.log
+
+
