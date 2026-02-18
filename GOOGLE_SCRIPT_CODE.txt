@@ -174,18 +174,26 @@ function doGet(e) {
 // This function handles data from your website
 function doPost(e) {
   try {
+    Logger.log('=== doPost called ===');
+    Logger.log('Has postData: ' + (e && e.postData ? 'YES' : 'NO'));
+    
     const sheet = SpreadsheetApp.getActiveSheet();
     
     // Check if we have post data
     if (!e || !e.postData || !e.postData.contents) {
+      Logger.log('✗ No post data received');
       return ContentService.createTextOutput(JSON.stringify({error: 'No data received'}))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
+    Logger.log('Post data received, parsing...');
     const data = JSON.parse(e.postData.contents);
+    Logger.log('Data type: ' + data.type);
+    Logger.log('Data keys: ' + Object.keys(data).join(', '));
     
     // Handle discovery form submission
     if (data.type === 'discovery') {
+      Logger.log('Processing discovery form submission');
       sheet.appendRow([
         data.name || '',
         data.age || '',
@@ -205,8 +213,11 @@ function doPost(e) {
     
     // Handle risk assessment submission
     if (data.type === 'assessment') {
+      Logger.log('Processing assessment submission');
+      
       // Find the row with matching email
       const email = data.email;
+      Logger.log('Looking for email: ' + email);
       const lastRow = sheet.getLastRow();
       let rowToUpdate = null;
       
@@ -223,6 +234,7 @@ function doPost(e) {
       
       if (rowToUpdate) {
         // Update existing row with assessment data
+        Logger.log('Updating existing row: ' + rowToUpdate);
         sheet.getRange(rowToUpdate, 1).setValue(data.name || '');
         sheet.getRange(rowToUpdate, 2).setValue(data.age || '');
         sheet.getRange(rowToUpdate, 3).setValue(data.email || '');
@@ -238,6 +250,7 @@ function doPost(e) {
         sheet.getRange(rowToUpdate, 13).setValue(data.timestamp || new Date());
       } else {
         // Create new row if email not found
+        Logger.log('Creating new row');
         sheet.appendRow([
           data.name || '',
           data.age || '',
@@ -256,25 +269,89 @@ function doPost(e) {
       }
       
       // Send email copy if requested
+      Logger.log('=== EMAIL CHECK START ===');
+      Logger.log('sendCopy value: ' + data.sendCopy + ' (type: ' + typeof data.sendCopy + ')');
+      Logger.log('email value: ' + data.email);
+      Logger.log('answers present: ' + (data.answers ? 'YES' : 'NO'));
+      if (data.answers) {
+        Logger.log('answers keys: ' + Object.keys(data.answers).join(', '));
+      }
+      
       if (data.sendCopy && data.email && data.answers) {
         try {
-          const emailBody = formatQuestionnaireEmail(data.name, data.answers, data.riskBucket, data.riskScore, data.equityAllocation, data.debtAllocation, data.alternativesAllocation);
+          Logger.log('✓ All conditions met! Attempting to send email to: ' + data.email);
+          
+          // Generate email body
+          const emailBody = formatQuestionnaireEmail(
+            data.name, 
+            data.answers, 
+            data.riskBucket, 
+            data.riskScore, 
+            data.equityAllocation, 
+            data.debtAllocation, 
+            data.alternativesAllocation
+          );
+          
+          Logger.log('Email body generated, length: ' + emailBody.length + ' characters');
+          
+          // Send email using MailApp (uses SMTP internally)
           MailApp.sendEmail({
             to: data.email,
             subject: 'Your Risk Assessment Questionnaire - Financial Planning Advisory',
-            htmlBody: emailBody
+            htmlBody: emailBody,
+            name: 'Financial Planning Advisory - Gautam Kathuria'
           });
+          
+          Logger.log('✓✓✓ Email sent successfully to: ' + data.email);
         } catch (emailError) {
-          console.error('Error sending email:', emailError);
-          // Don't fail the whole request if email fails
+          Logger.log('✗✗✗ ERROR sending email: ' + emailError.toString());
+          Logger.log('Error message: ' + emailError.message);
+          Logger.log('Error stack: ' + (emailError.stack || 'No stack trace'));
+          
+          // Try alternative method using GmailApp as fallback
+          try {
+            Logger.log('Attempting fallback with GmailApp...');
+            const emailBody = formatQuestionnaireEmail(
+              data.name, 
+              data.answers, 
+              data.riskBucket, 
+              data.riskScore, 
+              data.equityAllocation, 
+              data.debtAllocation, 
+              data.alternativesAllocation
+            );
+            
+            GmailApp.sendEmail(
+              data.email,
+              'Your Risk Assessment Questionnaire - Financial Planning Advisory',
+              '',
+              {
+                htmlBody: emailBody,
+                name: 'Financial Planning Advisory - Gautam Kathuria'
+              }
+            );
+            Logger.log('✓✓✓ Email sent successfully using GmailApp fallback to: ' + data.email);
+          } catch (gmailError) {
+            Logger.log('✗✗✗ GmailApp fallback also failed: ' + gmailError.toString());
+          }
         }
+      } else {
+        Logger.log('✗ Email NOT sent. Missing conditions:');
+        if (!data.sendCopy) Logger.log('  - sendCopy is false or missing (value: ' + data.sendCopy + ')');
+        if (!data.email) Logger.log('  - email is missing');
+        if (!data.answers) Logger.log('  - answers is missing');
       }
+      Logger.log('=== EMAIL CHECK END ===');
     }
     
+    Logger.log('doPost completed successfully');
     return ContentService.createTextOutput(JSON.stringify({success: true}))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
+    Logger.log('✗✗✗ ERROR in doPost: ' + error.toString());
+    Logger.log('Error message: ' + error.message);
+    Logger.log('Error stack: ' + (error.stack || 'No stack trace'));
     return ContentService.createTextOutput(JSON.stringify({
       error: error.toString(),
       message: error.message

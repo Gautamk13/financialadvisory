@@ -18,6 +18,14 @@ async function saveAssessmentToGoogleSheets(result, answers) {
         const discoveryDataStr = sessionStorage.getItem('discoveryFormData');
         const discoveryData = discoveryDataStr ? JSON.parse(discoveryDataStr) : {};
         
+        // Ensure we capture the checkbox value correctly
+        const sendCopyValue = personalInfo.sendCopy === true || personalInfo.sendCopy === 'true';
+        
+        console.log('=== Sending Assessment Data ===');
+        console.log('sendCopy checkbox value:', sendCopyValue);
+        console.log('personalInfo.sendCopy:', personalInfo.sendCopy);
+        console.log('Email:', discoveryData.email || personalInfo.email || '');
+        
         const dataToSave = {
             name: discoveryData.name || personalInfo.name || '',
             age: discoveryData.age || '',
@@ -31,11 +39,18 @@ async function saveAssessmentToGoogleSheets(result, answers) {
             equityAllocation: result.allocation.equity,
             debtAllocation: result.allocation.debt,
             alternativesAllocation: result.allocation.alternatives,
-            sendCopy: personalInfo.sendCopy || false,
+            sendCopy: sendCopyValue, // Explicitly convert to boolean
             answers: answers || {},
             type: 'assessment',
             timestamp: new Date().toISOString()
         };
+        
+        console.log('Data being sent:', {
+            email: dataToSave.email,
+            sendCopy: dataToSave.sendCopy,
+            hasAnswers: !!dataToSave.answers,
+            answerKeys: Object.keys(dataToSave.answers || {})
+        });
 
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -72,21 +87,16 @@ function initializePersonalInfoForm() {
             document.getElementById('phone').value = data.phone || '';
             document.getElementById('email').value = data.email || '';
             
-            // Store for later use
+            // Store for later use (but keep form visible so user can check the box)
             personalInfo = {
                 name: data.name,
                 phone: data.phone,
                 email: data.email,
-                sendCopy: false // Default to false, user can check if they want
+                sendCopy: false // Will be updated when form is submitted
             };
             
-            // Auto-submit and go to assessment
-            document.getElementById('personalInfoSection').classList.remove('active');
-            document.getElementById('assessmentSection').classList.add('active');
-            showQuestion(0);
-            
-            // Clear sessionStorage after using
-            sessionStorage.removeItem('discoveryFormData');
+            // DON'T auto-submit - let user see the form and check the box if they want
+            // The form will be visible and user can check the checkbox before proceeding
         } catch (e) {
             console.error('Error parsing discovery data:', e);
         }
