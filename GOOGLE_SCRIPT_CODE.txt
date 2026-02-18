@@ -1,6 +1,167 @@
 // Copy this ENTIRE code into Google Apps Script
 // Make sure to copy everything from function doGet to the closing brace
 
+// Helper function to format answer values to readable text
+function formatAnswer(questionKey, answerValue) {
+  const answerMaps = {
+    incomeStability: {
+      'government_psu': 'Government / PSU',
+      'large_mnc': 'Large MNC (Salaried)',
+      'stable_sme': 'Stable SME Job',
+      'startup_unstable': 'Startup/Private (Unstable)',
+      'variable_freelance': 'Variable/Freelance Income'
+    },
+    savingsRate: {
+      'less_10': 'Less than 10%',
+      '10_20': '10% - 20%',
+      '20_35': '20% - 35%',
+      'more_35': 'More than 35%'
+    },
+    emergencyFund: {
+      'less_3': 'Less than 3 months',
+      '3_6': '3 - 6 months',
+      '6_12': '6 - 12 months',
+      'more_12': 'More than 12 months'
+    },
+    dependents: {
+      '0': '0 (None)',
+      '1': '1',
+      '2': '2',
+      '3_plus': '3 or more'
+    },
+    emiIncomeRatio: {
+      'less_10': 'Less than 10%',
+      '10_25': '10% - 25%',
+      '25_40': '25% - 40%',
+      'more_40': 'More than 40%'
+    },
+    jobReplaceability: {
+      'less_2_months': 'Less than 2 months',
+      '3_4_months': '3 - 4 months',
+      '6_plus_months': '6 months or more'
+    },
+    investmentDuration: {
+      'less_3': 'Less than 3 years',
+      '3_5': '3 - 5 years',
+      '5_10': '5 - 10 years',
+      'more_10': 'More than 10 years'
+    },
+    goalFlexibility: {
+      'fixed': 'Fixed deadline (cannot be changed)',
+      'semi_flexible': 'Semi-flexible (can be adjusted slightly)',
+      'fully_flexible': 'Fully flexible (no strict deadline)'
+    },
+    budgetTracking: {
+      'none': 'I don\'t track my budget',
+      'occasional': 'Occasionally (when I remember)',
+      'strict': 'Strict tracking (regularly maintained)'
+    },
+    investmentConsistency: {
+      'irregular': 'Irregular (miss many months)',
+      'sometimes': 'Sometimes consistent',
+      'consistent': 'Consistent (rarely miss)'
+    },
+    marketReaction: {
+      'sold': 'Sold some or all investments',
+      'held': 'Held investments (did nothing)',
+      'added': 'Added more investments (bought the dip)'
+    },
+    portfolioMonitoring: {
+      'daily': 'Daily (emotional checking)',
+      'weekly': 'Weekly',
+      'monthly': 'Monthly',
+      'rarely': 'Rarely (only when needed)'
+    }
+  };
+  
+  if (answerMaps[questionKey] && answerMaps[questionKey][answerValue]) {
+    return answerMaps[questionKey][answerValue];
+  }
+  return answerValue || 'Not answered';
+}
+
+// Function to format email with questionnaire and answers
+function formatQuestionnaireEmail(name, answers, riskBucket, riskScore, equityAlloc, debtAlloc, altAlloc) {
+  const questions = [
+    { key: 'incomeStability', text: '1. What is your employment type?' },
+    { key: 'savingsRate', text: '2. What percentage of your monthly income do you invest/save?' },
+    { key: 'emergencyFund', text: '3. How many months of expenses do you have in your emergency fund?' },
+    { key: 'dependents', text: '4. How many dependents do you have?' },
+    { key: 'emiIncomeRatio', text: '5. What is your EMI (loan payments) to Income ratio?' },
+    { key: 'jobReplaceability', text: '6. How long would it take you to find a similar job if you lost your current one?' },
+    { key: 'investmentDuration', text: '7. What is your investment duration/horizon?' },
+    { key: 'goalFlexibility', text: '8. How flexible is your investment goal deadline?' },
+    { key: 'budgetTracking', text: '9. How do you track your budget and expenses?' },
+    { key: 'investmentConsistency', text: '10. How consistent is your investment habit (SIP/regular investments)?' },
+    { key: 'marketReaction', text: '11. What did you do during the last major market fall/crash?' },
+    { key: 'portfolioMonitoring', text: '12. How often do you check your investment portfolio?' }
+  ];
+  
+  let html = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #000;">Risk Assessment Questionnaire - Your Responses</h2>
+          <p>Dear ${name || 'Valued Client'},</p>
+          <p>Thank you for completing the Risk Assessment Questionnaire. Below is a copy of your responses:</p>
+          
+          <h3 style="color: #000; margin-top: 30px;">Risk Capacity Assessment</h3>
+  `;
+  
+  // Add questions 1-8 (Risk Capacity)
+  for (let i = 0; i < 8; i++) {
+    const q = questions[i];
+    const answer = formatAnswer(q.key, answers[q.key]);
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-left: 3px solid #000;">
+        <p style="margin: 0 0 8px 0; font-weight: bold;">${q.text}</p>
+        <p style="margin: 0; color: #555;">Answer: ${answer}</p>
+      </div>
+    `;
+  }
+  
+  html += `
+          <h3 style="color: #000; margin-top: 30px;">Risk Behaviour Assessment</h3>
+  `;
+  
+  // Add questions 9-12 (Risk Behaviour)
+  for (let i = 8; i < 12; i++) {
+    const q = questions[i];
+    const answer = formatAnswer(q.key, answers[q.key]);
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-left: 3px solid #000;">
+        <p style="margin: 0 0 8px 0; font-weight: bold;">${q.text}</p>
+        <p style="margin: 0; color: #555;">Answer: ${answer}</p>
+      </div>
+    `;
+  }
+  
+  html += `
+          <h3 style="color: #000; margin-top: 30px;">Your Risk Assessment Results</h3>
+          <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin-top: 15px;">
+            <p style="margin: 5px 0;"><strong>Risk Score:</strong> ${riskScore || 'N/A'}</p>
+            <p style="margin: 5px 0;"><strong>Risk Profile:</strong> ${riskBucket || 'N/A'}</p>
+            <p style="margin: 5px 0;"><strong>Indicative Asset Allocation:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Equity: ${equityAlloc || 'N/A'}</li>
+              <li>Debt: ${debtAlloc || 'N/A'}</li>
+              <li>Alternatives: ${altAlloc || 'N/A'}</li>
+            </ul>
+          </div>
+          
+          <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+            <em>Note: This is indicative risk profile and educational allocation guidance. Investment advice is provided only after formal client onboarding and suitability assessment.</em>
+          </p>
+          
+          <p style="margin-top: 20px;">Best regards,<br>Financial Planning Advisory – Gautam Kathuria</p>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  return html;
+}
+
 // This function is for testing - when you open the URL in browser
 function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({
@@ -92,6 +253,21 @@ function doPost(e) {
           data.alternativesAllocation || '',
           data.timestamp || new Date()
         ]);
+      }
+      
+      // Send email copy if requested
+      if (data.sendCopy && data.email && data.answers) {
+        try {
+          const emailBody = formatQuestionnaireEmail(data.name, data.answers, data.riskBucket, data.riskScore, data.equityAllocation, data.debtAllocation, data.alternativesAllocation);
+          MailApp.sendEmail({
+            to: data.email,
+            subject: 'Your Risk Assessment Questionnaire - Financial Planning Advisory',
+            htmlBody: emailBody
+          });
+        } catch (emailError) {
+          console.error('Error sending email:', emailError);
+          // Don't fail the whole request if email fails
+        }
       }
     }
     

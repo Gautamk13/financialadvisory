@@ -7,7 +7,7 @@ const totalQuestions = 12;
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUkV_UN7MdOd-ArKdpnVuiQIHfNmAryzNUuKWcYA1WpGnVzKURrBCSANhpfx3-bqovIA/exec';
 
 // Function to save risk assessment results to Google Sheets
-async function saveAssessmentToGoogleSheets(result) {
+async function saveAssessmentToGoogleSheets(result, answers) {
     if (!GOOGLE_SCRIPT_URL) {
         console.warn('Google Script URL not configured. Skipping save to sheets.');
         return;
@@ -31,6 +31,8 @@ async function saveAssessmentToGoogleSheets(result) {
             equityAllocation: result.allocation.equity,
             debtAllocation: result.allocation.debt,
             alternativesAllocation: result.allocation.alternatives,
+            sendCopy: personalInfo.sendCopy || false,
+            answers: answers || {},
             type: 'assessment',
             timestamp: new Date().toISOString()
         };
@@ -74,7 +76,8 @@ function initializePersonalInfoForm() {
             personalInfo = {
                 name: data.name,
                 phone: data.phone,
-                email: data.email
+                email: data.email,
+                sendCopy: false // Default to false, user can check if they want
             };
             
             // Auto-submit and go to assessment
@@ -95,7 +98,8 @@ function initializePersonalInfoForm() {
         personalInfo = {
             name: document.getElementById('name').value.trim(),
             phone: document.getElementById('phone').value.trim(),
-            email: document.getElementById('email').value.trim()
+            email: document.getElementById('email').value.trim(),
+            sendCopy: document.getElementById('sendCopy').checked
         };
 
         // Switch to assessment section
@@ -473,7 +477,7 @@ async function submitAssessment() {
         const result = engine.calculate(answers);
         
         // Save to Google Sheets
-        saveAssessmentToGoogleSheets(result);
+        saveAssessmentToGoogleSheets(result, answers);
         
         // Hide processing indicator
         document.getElementById('processingIndicator').style.display = 'none';
