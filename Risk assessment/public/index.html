@@ -773,7 +773,8 @@
         </section>
     </div>
 
-    <script src="../../config.js"></script>
+    <!-- Load config.js if it exists (for local development) -->
+    <script src="../../config.js" onerror="console.log('config.js not found, using environment variables')"></script>
     <script src="script.js"></script>
 </body>
 </html>

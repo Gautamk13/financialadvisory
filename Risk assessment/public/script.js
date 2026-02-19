@@ -3,8 +3,10 @@ let currentQuestion = 0;
 let personalInfo = {};
 const totalQuestions = 25;
 
-// Google Sheets Script URL (loaded from config.js)
-const GOOGLE_SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.googleScriptUrl) ? CONFIG.googleScriptUrl : '';
+// Google Sheets Script URL (loaded from Vercel env var or config.js)
+const GOOGLE_SCRIPT_URL = (typeof window !== 'undefined' && window.GOOGLE_SCRIPT_URL) || 
+                          (typeof CONFIG !== 'undefined' && CONFIG.googleScriptUrl) || 
+                          '';
 
 // Function to save risk assessment results to Google Sheets
 async function saveAssessmentToGoogleSheets(result, answers) {
