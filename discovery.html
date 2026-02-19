@@ -129,7 +129,8 @@
   </footer>
 
   <script src="js/main.js"></script>
-  <script src="config.js"></script>
+  <!-- Load config.js if it exists (for local development) -->
+  <script src="config.js" onerror="console.log('config.js not found, using environment variables')"></script>
   <script>
     // Show service details when service is selected
     document.getElementById('service').addEventListener('change', function() {
