@@ -3,13 +3,13 @@ let currentQuestion = 0;
 let personalInfo = {};
 const totalQuestions = 25;
 
-// Google Sheets Script URL
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6f9cQjTRnJwXuqEOJiIDfRyhFrodc6RVZz88bS8C9UBu2EMEg6eNVismCVpZE2_5_/exec';
+// Google Sheets Script URL (loaded from config.js)
+const GOOGLE_SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.googleScriptUrl) ? CONFIG.googleScriptUrl : '';
 
 // Function to save risk assessment results to Google Sheets
 async function saveAssessmentToGoogleSheets(result, answers) {
     if (!GOOGLE_SCRIPT_URL) {
-        console.warn('Google Script URL not configured. Skipping save to sheets.');
+        console.warn('Google Script URL not configured. Please check config.js file.');
         return;
     }
 

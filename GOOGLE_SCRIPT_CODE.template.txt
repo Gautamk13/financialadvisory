@@ -1,0 +1,144 @@
+// Copy this ENTIRE code into Google Apps Script
+// Replace the Firebase configuration values below with your actual credentials
+// Get these from: firebase.config.js (local file, not in Git)
+
+// ===== FIREBASE CONFIGURATION =====
+// TODO: Replace these with your actual Firebase credentials
+const FIREBASE_PROJECT_ID = 'YOUR_PROJECT_ID';
+const FIREBASE_SERVICE_ACCOUNT_EMAIL = 'YOUR_SERVICE_ACCOUNT_EMAIL';
+const FIREBASE_PRIVATE_KEY = 'YOUR_PRIVATE_KEY_HERE';
+
+// Firestore API endpoint
+const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+
+// ===== FIREBASE HELPER FUNCTIONS =====
+
+// Get OAuth2 access token for Firebase (without external library)
+function getFirebaseAccessToken() {
+  try {
+    // Create JWT for service account
+    const now = Math.floor(Date.now() / 1000);
+    const jwtHeader = {
+      "alg": "RS256",
+      "typ": "JWT"
+    };
+    
+    const jwtClaim = {
+      "iss": FIREBASE_SERVICE_ACCOUNT_EMAIL,
+      "sub": FIREBASE_SERVICE_ACCOUNT_EMAIL,
+      "aud": "https://oauth2.googleapis.com/token",
+      "exp": now + 3600,
+      "iat": now,
+      "scope": "https://www.googleapis.com/auth/datastore"
+    };
+    
+    // Sign JWT
+    const jwtHeaderB64 = Utilities.base64EncodeWebSafe(JSON.stringify(jwtHeader));
+    const jwtClaimB64 = Utilities.base64EncodeWebSafe(JSON.stringify(jwtClaim));
+    const jwtUnsigned = jwtHeaderB64 + "." + jwtClaimB64;
+    
+    // Use Utilities.computeRsaSha256Signature for signing
+    const signature = Utilities.computeRsaSha256Signature(jwtUnsigned, FIREBASE_PRIVATE_KEY);
+    const signatureB64 = Utilities.base64EncodeWebSafe(signature);
+    const jwt = jwtUnsigned + "." + signatureB64;
+    
+    // Exchange JWT for access token
+    const tokenResponse = UrlFetchApp.fetch("https://oauth2.googleapis.com/token", {
+      method: "post",
+      contentType: "application/x-www-form-urlencoded",
+      payload: {
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion: jwt
+      }
+    });
+    
+    const tokenData = JSON.parse(tokenResponse.getContentText());
+    return tokenData.access_token;
+    
+  } catch (error) {
+    Logger.log('Error getting Firebase access token: ' + error.toString());
+    throw error;
+  }
+}
+
+// Convert data to Firestore format
+function convertToFirestoreFields(data) {
+  const fields = {};
+  for (let key in data) {
+    const value = data[key];
+    
+    if (value === null || value === undefined) {
+      fields[key] = { nullValue: null };
+    } else if (typeof value === 'string') {
+      fields[key] = { stringValue: value };
+    } else if (typeof value === 'number') {
+      if (Number.isInteger(value)) {
+        fields[key] = { integerValue: String(value) };
+      } else {
+        fields[key] = { doubleValue: value };
+      }
+    } else if (typeof value === 'boolean') {
+      fields[key] = { booleanValue: value };
+    } else if (Array.isArray(value)) {
+      fields[key] = { 
+        arrayValue: { 
+          values: value.map(v => {
+            if (typeof v === 'string') return { stringValue: v };
+            if (typeof v === 'number') return { doubleValue: v };
+            if (typeof v === 'boolean') return { booleanValue: v };
+            return { stringValue: String(v) };
+          })
+        } 
+      };
+    } else if (typeof value === 'object') {
+      fields[key] = { mapValue: { fields: convertToFirestoreFields(value) } };
+    } else {
+      fields[key] = { stringValue: String(value) };
+    }
+  }
+  return fields;
+}
+
+// Save data to Firestore
+function saveToFirestore(collectionName, data) {
+  try {
+    const accessToken = getFirebaseAccessToken();
+    const url = `${FIRESTORE_URL}/${collectionName}`;
+    
+    const payload = {
+      fields: convertToFirestoreFields(data)
+    };
+    
+    const options = {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+    
+    Logger.log('Firestore Save Response Code: ' + responseCode);
+    Logger.log('Firestore Save Response: ' + responseText);
+    
+    if (responseCode === 200 || responseCode === 201) {
+      Logger.log('✓ Successfully saved to Firestore');
+      return JSON.parse(responseText);
+    } else {
+      Logger.log('✗ Error saving to Firestore: ' + responseText);
+      throw new Error('Firestore save failed: ' + responseText);
+    }
+  } catch (error) {
+    Logger.log('✗✗✗ Exception saving to Firestore: ' + error.toString());
+    throw error;
+  }
+}
+
+// [Rest of the code continues with formatAnswer, formatQuestionnaireEmail, doGet, doPost functions...]
+// See GOOGLE_SCRIPT_CODE.txt for the complete code
+

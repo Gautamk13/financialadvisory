@@ -6,10 +6,18 @@ Risk assessment/node_modules/
 *.db
 Risk assessment/risk_assessments.db
 
+# Sensitive configuration files - NEVER commit these!
+firebase.config.js
+config.js
+GOOGLE_SCRIPT_CODE.txt
+*.key
+*.pem
+.env
+.env.local
+
 # Documentation files (optional - you can include these if you want)
 # GOOGLE_SHEETS_SETUP.md
 # DEPLOYMENT_GUIDE.md
-# GOOGLE_SCRIPT_CODE.txt
 # QUICK_START.md
 
 # OS files
