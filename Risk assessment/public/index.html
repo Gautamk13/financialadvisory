@@ -91,81 +91,247 @@
                     <!-- Q2: Monthly Expenses -->
                     <div class="question" data-q="2">
                         <h3>2. What are your monthly expenses?</h3>
-                        <div class="form-group">
-                            <label for="monthlyExpenses">Monthly Expenses (₹) *</label>
-                            <input type="number" id="monthlyExpenses" name="monthlyExpenses" min="0" step="1000" required>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="monthlyExpenses" value="less_20k" required>
+                                <span>Less than ₹20,000</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="monthlyExpenses" value="20k_50k" required>
+                                <span>₹20,000 - ₹50,000</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="monthlyExpenses" value="50k_1lakh" required>
+                                <span>₹50,000 - ₹1 lakh</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="monthlyExpenses" value="1lakh_2lakh" required>
+                                <span>₹1 lakh - ₹2 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="monthlyExpenses" value="above_2lakh" required>
+                                <span>Above ₹2 lakhs</span>
+                            </label>
                         </div>
                     </div>
 
                     <!-- Q3: Number of Dependents -->
                     <div class="question" data-q="3">
                         <h3>3. How many dependents do you have?</h3>
-                        <div class="form-group">
-                            <label for="numDependents">Number of Dependents *</label>
-                            <input type="number" id="numDependents" name="numDependents" min="0" required>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="numDependents" value="0" required>
+                                <span>0 (None)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="numDependents" value="1" required>
+                                <span>1</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="numDependents" value="2" required>
+                                <span>2</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="numDependents" value="3" required>
+                                <span>3</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="numDependents" value="4_plus" required>
+                                <span>4 or more</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q4: Dependents Details -->
+                    <!-- Q4: Dependents Age Group -->
                     <div class="question" data-q="4">
-                        <h3>4. Dependents Details</h3>
-                        <div class="form-group">
-                            <label for="dependentsDetails">Please list your dependents and their ages (e.g., Spouse: 30, Child 1: 5, Child 2: 3) *</label>
-                            <textarea id="dependentsDetails" name="dependentsDetails" rows="4" required placeholder="Example: Spouse: 30 years, Child 1: 5 years, Child 2: 3 years"></textarea>
+                        <h3>4. What is the age group of your dependents?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="dependentsAgeGroup" value="no_dependents" required>
+                                <span>No dependents</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependentsAgeGroup" value="all_adults" required>
+                                <span>All adults (self-sufficient)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependentsAgeGroup" value="mix_adults_children" required>
+                                <span>Mix of adults and children</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependentsAgeGroup" value="all_children" required>
+                                <span>All children (under 18)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="dependentsAgeGroup" value="elderly" required>
+                                <span>Elderly dependents</span>
+                            </label>
                         </div>
                     </div>
 
                     <!-- Q5: Net Worth -->
                     <div class="question" data-q="5">
                         <h3>5. What is your approximate net worth?</h3>
-                        <div class="form-group">
-                            <label for="netWorth">Net Worth (₹) *</label>
-                            <input type="number" id="netWorth" name="netWorth" min="0" step="10000" required>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="less_10lakhs" required>
+                                <span>Less than ₹10 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="10lakhs_25lakhs" required>
+                                <span>₹10 lakhs - ₹25 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="25lakhs_50lakhs" required>
+                                <span>₹25 lakhs - ₹50 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="50lakhs_1crore" required>
+                                <span>₹50 lakhs - ₹1 crore</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="1crore_5crore" required>
+                                <span>₹1 crore - ₹5 crores</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="netWorth" value="above_5crore" required>
+                                <span>Above ₹5 crores</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q6: Liquid Assets -->
+                    <!-- Q6: Liquid Assets Ratio -->
                     <div class="question" data-q="6">
-                        <h3>6. Net Worth Components - Liquid Assets (Cash, Bank)</h3>
-                        <div class="form-group">
-                            <label for="liquidAssets">Liquid Assets (₹) *</label>
-                            <input type="number" id="liquidAssets" name="liquidAssets" min="0" step="10000" required>
+                        <h3>6. What percentage of your net worth is in liquid assets (Cash, Bank)?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="liquidAssetsRatio" value="less_10" required>
+                                <span>Less than 10%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="liquidAssetsRatio" value="10_20" required>
+                                <span>10% - 20%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="liquidAssetsRatio" value="20_30" required>
+                                <span>20% - 30%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="liquidAssetsRatio" value="30_50" required>
+                                <span>30% - 50%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="liquidAssetsRatio" value="above_50" required>
+                                <span>Above 50%</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q7: Investments -->
+                    <!-- Q7: Investment Ratio -->
                     <div class="question" data-q="7">
-                        <h3>7. Net Worth Components - Investments</h3>
-                        <div class="form-group">
-                            <label for="investments">Investments (₹) *</label>
-                            <input type="number" id="investments" name="investments" min="0" step="10000" required>
+                        <h3>7. What percentage of your net worth is in investments (stocks, mutual funds, etc.)?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="investmentRatio" value="less_20" required>
+                                <span>Less than 20%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentRatio" value="20_40" required>
+                                <span>20% - 40%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentRatio" value="40_60" required>
+                                <span>40% - 60%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentRatio" value="60_80" required>
+                                <span>60% - 80%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentRatio" value="above_80" required>
+                                <span>Above 80%</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q8: Real Estate -->
+                    <!-- Q8: Real Estate Ratio -->
                     <div class="question" data-q="8">
-                        <h3>8. Net Worth Components - Real Estate</h3>
-                        <div class="form-group">
-                            <label for="realEstate">Real Estate (₹) *</label>
-                            <input type="number" id="realEstate" name="realEstate" min="0" step="10000" required>
+                        <h3>8. What percentage of your net worth is in real estate?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="realEstateRatio" value="0" required>
+                                <span>0% (No real estate)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="realEstateRatio" value="less_30" required>
+                                <span>Less than 30%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="realEstateRatio" value="30_50" required>
+                                <span>30% - 50%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="realEstateRatio" value="50_70" required>
+                                <span>50% - 70%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="realEstateRatio" value="above_70" required>
+                                <span>Above 70%</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q9: Other Assets -->
+                    <!-- Q9: Debt to Net Worth Ratio -->
                     <div class="question" data-q="9">
-                        <h3>9. Net Worth Components - Other Assets</h3>
-                        <div class="form-group">
-                            <label for="otherAssets">Other Assets (₹) *</label>
-                            <input type="number" id="otherAssets" name="otherAssets" min="0" step="10000" required>
+                        <h3>9. What is your debt to net worth ratio?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="debtToNetWorth" value="0" required>
+                                <span>0% (No debt)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="debtToNetWorth" value="less_20" required>
+                                <span>Less than 20%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="debtToNetWorth" value="20_40" required>
+                                <span>20% - 40%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="debtToNetWorth" value="40_60" required>
+                                <span>40% - 60%</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="debtToNetWorth" value="above_60" required>
+                                <span>Above 60%</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Q10: Liabilities -->
+                    <!-- Q10: Financial Stability -->
                     <div class="question" data-q="10">
-                        <h3>10. Net Worth Components - Liabilities</h3>
-                        <div class="form-group">
-                            <label for="liabilities">Liabilities (₹) *</label>
-                            <input type="number" id="liabilities" name="liabilities" min="0" step="10000" required>
+                        <h3>10. How would you describe your current financial stability?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="financialStability" value="very_stable" required>
+                                <span>Very stable (high savings, low debt, secure income)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="financialStability" value="stable" required>
+                                <span>Stable (adequate savings, manageable debt)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="financialStability" value="moderate" required>
+                                <span>Moderate (some savings, moderate debt)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="financialStability" value="unstable" required>
+                                <span>Unstable (low savings, high debt)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="financialStability" value="very_unstable" required>
+                                <span>Very unstable (no savings, high debt burden)</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -178,56 +344,54 @@
                     <!-- Q11: Years of Investment Experience -->
                     <div class="question" data-q="11">
                         <h3>11. How many years of investment experience do you have?</h3>
-                        <div class="form-group">
-                            <label for="investmentExperienceYears">Years of Investment Experience *</label>
-                            <input type="number" id="investmentExperienceYears" name="investmentExperienceYears" min="0" max="50" required>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="investmentExperienceYears" value="0" required>
+                                <span>0 years (No experience)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentExperienceYears" value="1_2" required>
+                                <span>1 - 2 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentExperienceYears" value="3_5" required>
+                                <span>3 - 5 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentExperienceYears" value="6_10" required>
+                                <span>6 - 10 years</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="investmentExperienceYears" value="above_10" required>
+                                <span>Above 10 years</span>
+                            </label>
                         </div>
                     </div>
 
                     <!-- Q12: Types of Investments -->
                     <div class="question" data-q="12">
-                        <h3>12. What types of investments have you held? (Select all applicable)</h3>
+                        <h3>12. What types of investments have you primarily held?</h3>
                         <div class="options">
                             <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="fixed_deposits">
-                                <span>Fixed Deposits / Savings Accounts</span>
+                                <input type="radio" name="investmentTypes" value="only_safe" required>
+                                <span>Only safe investments (FDs, Savings, PPF)</span>
                             </label>
                             <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="mutual_funds_equity">
-                                <span>Mutual Funds (Equity)</span>
+                                <input type="radio" name="investmentTypes" value="mostly_safe" required>
+                                <span>Mostly safe with some debt funds</span>
                             </label>
                             <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="mutual_funds_debt">
-                                <span>Mutual Funds (Debt)</span>
+                                <input type="radio" name="investmentTypes" value="balanced" required>
+                                <span>Balanced mix (Equity, Debt, Gold)</span>
                             </label>
                             <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="direct_equity">
-                                <span>Direct Equity / Stocks</span>
+                                <input type="radio" name="investmentTypes" value="mostly_equity" required>
+                                <span>Mostly equity (Mutual funds, stocks)</span>
                             </label>
                             <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="bonds_debentures">
-                                <span>Bonds / Debentures</span>
+                                <input type="radio" name="investmentTypes" value="diversified" required>
+                                <span>Highly diversified (Equity, Debt, Real Estate, Gold, Alternatives)</span>
                             </label>
-                            <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="real_estate">
-                                <span>Real Estate</span>
-                            </label>
-                            <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="gold_precious_metals">
-                                <span>Gold / Precious Metals</span>
-                            </label>
-                            <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="insurance_products">
-                                <span>Insurance Products</span>
-                            </label>
-                            <label class="option">
-                                <input type="checkbox" name="investmentTypes" value="other">
-                                <span>Other</span>
-                            </label>
-                        </div>
-                        <div class="form-group" style="margin-top: 15px;">
-                            <label for="investmentTypesOther">If "Other", please specify:</label>
-                            <input type="text" id="investmentTypesOther" name="investmentTypesOther" placeholder="Specify other investment types">
                         </div>
                     </div>
 
@@ -543,6 +707,18 @@
                 </div>
 
                 <div id="resultsContent" style="display: none;">
+                    <div class="score-card">
+                        <h3>Financial Information Score</h3>
+                        <div class="score-value" id="financialInfoScore">-</div>
+                        <p class="score-label">Your financial situation assessment</p>
+                    </div>
+
+                    <div class="score-card">
+                        <h3>Investment Experience Score</h3>
+                        <div class="score-value" id="investmentExperienceScore">-</div>
+                        <p class="score-label">Your investment background and knowledge</p>
+                    </div>
+
                     <div class="score-card">
                         <h3>Risk Capacity Score</h3>
                         <div class="score-value" id="riskCapacityScore">-</div>

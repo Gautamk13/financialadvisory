@@ -44,6 +44,8 @@ async function saveAssessmentToGoogleSheets(result, answers) {
             email: discoveryData.email || personalInfo.email || '',
             phone: discoveryData.phone || personalInfo.phone || '',
             service: discoveryData.service || '',
+            financialInfoScore: result.financialInfoScore,
+            investmentExperienceScore: result.investmentExperienceScore,
             riskCapacity: result.riskCapacity,
             riskBehaviour: result.riskBehaviour,
             riskScore: result.finalScore,
@@ -218,27 +220,6 @@ function validateCurrentQuestion() {
         }
     }
     
-    // Check for required text/number inputs
-    const requiredInputs = activeQuestion.querySelectorAll('input[required], textarea[required]');
-    for (let input of requiredInputs) {
-        if (!input.value || input.value.trim() === '') {
-            alert('Please fill in all required fields before proceeding.');
-            input.focus();
-            return false;
-        }
-    }
-    
-    // Check for checkboxes (at least one must be checked if there are checkboxes)
-    const checkboxInputs = activeQuestion.querySelectorAll('input[type="checkbox"]');
-    if (checkboxInputs.length > 0 && !Array.from(checkboxInputs).some(cb => cb.checked)) {
-        // For investment types, at least one should be selected
-        const questionText = activeQuestion.querySelector('h3').textContent;
-        if (questionText.includes('types of investments')) {
-            alert('Please select at least one investment type before proceeding.');
-            return false;
-        }
-    }
-    
     return true;
 }
 
@@ -348,6 +329,166 @@ class RiskAssessmentEngine {
             'daily': 3,
             'monthly': 7,
             'periodic': 10
+        };
+
+        // Financial Information Scoring Tables
+        this.annualIncomeScores = {
+            'less_5_lakhs': 2,
+            '5_10_lakhs': 4,
+            '10_25_lakhs': 6,
+            '25_50_lakhs': 8,
+            '50_lakhs_1_crore': 9,
+            'above_1_crore': 10
+        };
+
+        this.monthlyExpensesScores = {
+            'less_20k': 10,
+            '20k_50k': 8,
+            '50k_1lakh': 6,
+            '1lakh_2lakh': 4,
+            'above_2lakh': 2
+        };
+
+        this.numDependentsScores = {
+            '0': 10,
+            '1': 8,
+            '2': 6,
+            '3': 4,
+            '4_plus': 2
+        };
+
+        this.dependentsAgeGroupScores = {
+            'no_dependents': 10,
+            'all_adults': 8,
+            'mix_adults_children': 6,
+            'all_children': 4,
+            'elderly': 3
+        };
+
+        this.netWorthScores = {
+            'less_10lakhs': 2,
+            '10lakhs_25lakhs': 4,
+            '25lakhs_50lakhs': 6,
+            '50lakhs_1crore': 8,
+            '1crore_5crore': 9,
+            'above_5crore': 10
+        };
+
+        this.liquidAssetsRatioScores = {
+            'less_10': 3,
+            '10_20': 7,
+            '20_30': 10,
+            '30_50': 8,
+            'above_50': 5
+        };
+
+        this.investmentRatioScores = {
+            'less_20': 3,
+            '20_40': 6,
+            '40_60': 8,
+            '60_80': 9,
+            'above_80': 10
+        };
+
+        this.realEstateRatioScores = {
+            '0': 5,
+            'less_30': 8,
+            '30_50': 7,
+            '50_70': 5,
+            'above_70': 3
+        };
+
+        this.debtToNetWorthScores = {
+            '0': 10,
+            'less_20': 8,
+            '20_40': 6,
+            '40_60': 4,
+            'above_60': 2
+        };
+
+        this.financialStabilityScores = {
+            'very_stable': 10,
+            'stable': 8,
+            'moderate': 6,
+            'unstable': 3,
+            'very_unstable': 1
+        };
+
+        // Investment Experience Scoring Tables
+        this.investmentExperienceYearsScores = {
+            '0': 2,
+            '1_2': 4,
+            '3_5': 6,
+            '6_10': 8,
+            'above_10': 10
+        };
+
+        this.investmentTypesScores = {
+            'only_safe': 3,
+            'mostly_safe': 5,
+            'balanced': 7,
+            'mostly_equity': 8,
+            'diversified': 10
+        };
+
+        this.knowledgeLevelScores = {
+            'beginner': 2,
+            'intermediate': 5,
+            'advanced': 8,
+            'expert': 10
+        };
+    }
+
+    calculateFinancialInfoScore(inputs) {
+        const annualIncomeScore = this.annualIncomeScores[inputs.annualIncome] || 0;
+        const monthlyExpensesScore = this.monthlyExpensesScores[inputs.monthlyExpenses] || 0;
+        const numDependentsScore = this.numDependentsScores[inputs.numDependents] || 0;
+        const dependentsAgeGroupScore = this.dependentsAgeGroupScores[inputs.dependentsAgeGroup] || 0;
+        const netWorthScore = this.netWorthScores[inputs.netWorth] || 0;
+        const liquidAssetsRatioScore = this.liquidAssetsRatioScores[inputs.liquidAssetsRatio] || 0;
+        const investmentRatioScore = this.investmentRatioScores[inputs.investmentRatio] || 0;
+        const realEstateRatioScore = this.realEstateRatioScores[inputs.realEstateRatio] || 0;
+        const debtToNetWorthScore = this.debtToNetWorthScores[inputs.debtToNetWorth] || 0;
+        const financialStabilityScore = this.financialStabilityScores[inputs.financialStability] || 0;
+
+        // Calculate weighted average (all questions weighted equally)
+        const financialInfoScore = (
+            annualIncomeScore + monthlyExpensesScore + numDependentsScore + 
+            dependentsAgeGroupScore + netWorthScore + liquidAssetsRatioScore + 
+            investmentRatioScore + realEstateRatioScore + debtToNetWorthScore + 
+            financialStabilityScore
+        ) / 10;
+
+        return {
+            financialInfoScore: Math.round(financialInfoScore * 100) / 100,
+            annualIncomeScore,
+            monthlyExpensesScore,
+            numDependentsScore,
+            dependentsAgeGroupScore,
+            netWorthScore,
+            liquidAssetsRatioScore,
+            investmentRatioScore,
+            realEstateRatioScore,
+            debtToNetWorthScore,
+            financialStabilityScore
+        };
+    }
+
+    calculateInvestmentExperienceScore(inputs) {
+        const investmentExperienceYearsScore = this.investmentExperienceYearsScores[inputs.investmentExperienceYears] || 0;
+        const investmentTypesScore = this.investmentTypesScores[inputs.investmentTypes] || 0;
+        const knowledgeLevelScore = this.knowledgeLevelScores[inputs.knowledgeLevel] || 0;
+
+        // Calculate weighted average (all questions weighted equally)
+        const investmentExperienceScore = (
+            investmentExperienceYearsScore + investmentTypesScore + knowledgeLevelScore
+        ) / 3;
+
+        return {
+            investmentExperienceScore: Math.round(investmentExperienceScore * 100) / 100,
+            investmentExperienceYearsScore,
+            investmentTypesScore,
+            knowledgeLevelScore
         };
     }
 
@@ -466,8 +607,19 @@ class RiskAssessmentEngine {
     }
 
     calculate(inputs) {
+        // Calculate Financial Information Score
+        const financialInfoDetails = this.calculateFinancialInfoScore(inputs);
+        const financialInfoScore = financialInfoDetails.financialInfoScore;
+
+        // Calculate Investment Experience Score
+        const investmentExperienceDetails = this.calculateInvestmentExperienceScore(inputs);
+        const investmentExperienceScore = investmentExperienceDetails.investmentExperienceScore;
+
+        // Calculate Risk Capacity
         const rcDetails = this.calculateRiskCapacity(inputs);
         const riskCapacity = rcDetails.riskCapacity;
+        
+        // Calculate Risk Behaviour
         const riskBehaviour = this.calculateRiskBehaviour(inputs);
         
         // Final Score = MIN(RC, RB)
@@ -492,6 +644,8 @@ class RiskAssessmentEngine {
         }
 
         return {
+            financialInfoScore: financialInfoScore,
+            investmentExperienceScore: investmentExperienceScore,
             riskCapacity: Math.round(riskCapacity * 100) / 100,
             riskBehaviour: Math.round(riskBehaviour * 100) / 100,
             finalScore: roundedFinalScore,
@@ -501,7 +655,9 @@ class RiskAssessmentEngine {
                 debt: allocation.debt,
                 alternatives: allocation.alternatives
             },
-            overrides: overrideResult.overrides
+            overrides: overrideResult.overrides,
+            financialInfoDetails: financialInfoDetails,
+            investmentExperienceDetails: investmentExperienceDetails
         };
     }
 }
@@ -519,18 +675,17 @@ async function submitAssessment() {
         annualIncome: formData.get('annualIncome'),
         monthlyExpenses: formData.get('monthlyExpenses'),
         numDependents: formData.get('numDependents'),
-        dependentsDetails: formData.get('dependentsDetails'),
+        dependentsAgeGroup: formData.get('dependentsAgeGroup'),
         netWorth: formData.get('netWorth'),
-        liquidAssets: formData.get('liquidAssets'),
-        investments: formData.get('investments'),
-        realEstate: formData.get('realEstate'),
-        otherAssets: formData.get('otherAssets'),
-        liabilities: formData.get('liabilities'),
+        liquidAssetsRatio: formData.get('liquidAssetsRatio'),
+        investmentRatio: formData.get('investmentRatio'),
+        realEstateRatio: formData.get('realEstateRatio'),
+        debtToNetWorth: formData.get('debtToNetWorth'),
+        financialStability: formData.get('financialStability'),
         
         // Investment Experience
         investmentExperienceYears: formData.get('investmentExperienceYears'),
-        investmentTypes: investmentTypes.join(', '), // Convert array to comma-separated string
-        investmentTypesOther: formData.get('investmentTypesOther'),
+        investmentTypes: formData.get('investmentTypes'),
         knowledgeLevel: formData.get('knowledgeLevel'),
         
         // Risk Capacity Questions
@@ -591,6 +746,8 @@ async function submitAssessment() {
 
 function displayResults(result) {
     // Update scores
+    document.getElementById('financialInfoScore').textContent = result.financialInfoScore;
+    document.getElementById('investmentExperienceScore').textContent = result.investmentExperienceScore;
     document.getElementById('riskCapacityScore').textContent = result.riskCapacity;
     document.getElementById('riskBehaviourScore').textContent = result.riskBehaviour;
     document.getElementById('finalScore').textContent = result.finalScore;
