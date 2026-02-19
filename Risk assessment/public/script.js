@@ -4,7 +4,7 @@ let personalInfo = {};
 const totalQuestions = 25;
 
 // Google Sheets Script URL
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUkV_UN7MdOd-ArKdpnVuiQIHfNmAryzNUuKWcYA1WpGnVzKURrBCSANhpfx3-bqovIA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6f9cQjTRnJwXuqEOJiIDfRyhFrodc6RVZz88bS8C9UBu2EMEg6eNVismCVpZE2_5_/exec';
 
 // Function to save risk assessment results to Google Sheets
 async function saveAssessmentToGoogleSheets(result, answers) {

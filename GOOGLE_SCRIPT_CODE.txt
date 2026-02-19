@@ -1,6 +1,107 @@
 // Copy this ENTIRE code into Google Apps Script
 // Make sure to copy everything from function doGet to the closing brace
 
+// ===== FIREBASE CONFIGURATION =====
+const FIREBASE_PROJECT_ID = 'test-6f184';
+const FIREBASE_SERVICE_ACCOUNT_EMAIL = 'firebase-adminsdk-fbsvc@test-6f184.iam.gserviceaccount.com';
+const FIREBASE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDCONiVv5dRszyU\n4cCSzyYs78e91RAKGr7vrUz+9O1jfYR/HZv5iQb2iIGgZHDVb0gz0H0FLVGpcgZJ\n6qGxoeda254lqk5V+obnseTeushSWBvBsh/qWGRiBLzVc1oof/liXiFEEXa6Rh8/\nFuOHgS+xMhl4itdNGSp920XR2XH0gTvQd2LOpp/IIMiHMbhYx9ixE+INRpJ0+3EA\nkXQWSboCMReiPjk+tRv/9Ly8dNB5Dhsw3/BtzK52JrpGs8Qo+Zn6XuZ0vnIyIBoq\nLrFdITJHPysfFa1eR+Lb+Tyk6oupCTTeYKFAlltNt0+k7d5LqSj7cCDxuUCjV8QD\nucUxw6/7AgMBAAECggEAGRH0ZxQFiM69jaw8StcBYwCKhGb5vIwqRE7W5vwfnl2H\n2k6soP++jdkd/mGorOxB4ipR0PbCGUC2LhliyMaQ0goSNmNu3CtL+aFdXSC4FeT4\npD6FXx8Myhg5dcX/h8XJH5jt61bjv/SoOOEP+qBC0zkXz5cAZpvOf9NrhkRusLQ6\nCXaQMEeACW1r77cw5WlgaO3BC8OvRNgxfUNUamSdc553/0V8KdgabgAtmN0EJpsi\nU3SwRh5Qkf9kOEpcgMRrXcbAxjgYEHU4so38/B0mkGqNTYoFZzE+jo0Otwg4ddWa\nzyinK0V0WPkhJFzzxCmOes3H1DGFH19J62j708cx3QKBgQDy0SZG6aVfmQaloKXM\nPQ0hFwNC+gZlh9uPlhcqILbYhC3sQABPgwIb9O+noG7bIUkR63wz0fkIT+HrrmOO\nOvquV6SjUUwowQ6qRbKBVVwq4xvKlQc/aodeekmbxemG+kQ9/4sennzQNMI4FbCa\nX5Uh+UbVfHtp1ZOwLe5qSAwbrQKBgQDMxEnAMNm4HSSYje+htNxzDK06JsM5LnIj\nIX3auaOmjNu0W0/7Nu62r2n80rXmdyhfbHzJXrH2PjzAMzDheumREjlFB9oEEJmQ\ntAAByYRWvFUyU6LCd42QU3mDHvq9O5sjXMzQsiZiynlZD75MQX9kXtSOvvbGVFfO\nky0EnQhvRwKBgQCsNrxQFQwuNikptTuCFFbIfjrY+N0qi2Wke83oGhW0kGLFqUrP\nGdqYG2sR105oaj4Z0IthcW2PgKB5+FAxoxECL7TcBB/g07Pj/dSxt+nLnRGr53Ch\ngJuL3W1xZrfO/JcD5cc0qzFYteJ9xpxfkKUD2HltloEtOcYqcRkkFf9IbQKBgQCT\nvHtJgvVSdRRWTPG7xfXXvCmvbxAjTXNkDWH0UUPVgoNxmQAXzAZnICBkHNLIuOgU\nEP3ne78CXt0N/uEhjcC+vls7hvKxRBjH4lau82nb+n2tldI0ZHVq0A83nz5hEYRY\n+zd6y04OsO7kZwtxkUAMdq79XqJFbcz8agts7K+NOQKBgCg/d8vVX9u5mY0cPoQK\n4lWiOd8lGIMAAYDu8ROiXUqeRBIWgM+2xX62d6WCMrMgOmhaFCCsyD6WvkCZS/tT\nJfMUjuX//SwsVaomqiauFlgW/FMySQf+Wor6Ta4uLzgDJawCcYBSNV7+ZXaaIr+U\nj+cLGYUb/XHiPHAsyKYFk9PM\n-----END PRIVATE KEY-----\n';
+
+// Firestore API endpoint
+const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+
+// ===== FIREBASE HELPER FUNCTIONS =====
+
+// Get OAuth2 access token for Firebase
+function getFirebaseAccessToken() {
+  const service = OAuth2.createService('Firebase')
+    .setTokenUrl('https://oauth2.googleapis.com/token')
+    .setPrivateKey(FIREBASE_PRIVATE_KEY)
+    .setIssuer(FIREBASE_SERVICE_ACCOUNT_EMAIL)
+    .setSubject(FIREBASE_SERVICE_ACCOUNT_EMAIL)
+    .setPropertyStore(PropertiesService.getScriptProperties())
+    .setScope('https://www.googleapis.com/auth/datastore');
+  
+  return service.getAccessToken();
+}
+
+// Convert data to Firestore format
+function convertToFirestoreFields(data) {
+  const fields = {};
+  for (let key in data) {
+    const value = data[key];
+    
+    if (value === null || value === undefined) {
+      fields[key] = { nullValue: null };
+    } else if (typeof value === 'string') {
+      fields[key] = { stringValue: value };
+    } else if (typeof value === 'number') {
+      if (Number.isInteger(value)) {
+        fields[key] = { integerValue: String(value) };
+      } else {
+        fields[key] = { doubleValue: value };
+      }
+    } else if (typeof value === 'boolean') {
+      fields[key] = { booleanValue: value };
+    } else if (Array.isArray(value)) {
+      fields[key] = { 
+        arrayValue: { 
+          values: value.map(v => {
+            if (typeof v === 'string') return { stringValue: v };
+            if (typeof v === 'number') return { doubleValue: v };
+            if (typeof v === 'boolean') return { booleanValue: v };
+            return { stringValue: String(v) };
+          })
+        } 
+      };
+    } else if (typeof value === 'object') {
+      fields[key] = { mapValue: { fields: convertToFirestoreFields(value) } };
+    } else {
+      fields[key] = { stringValue: String(value) };
+    }
+  }
+  return fields;
+}
+
+// Save data to Firestore
+function saveToFirestore(collectionName, data) {
+  try {
+    const accessToken = getFirebaseAccessToken();
+    const url = `${FIRESTORE_URL}/${collectionName}`;
+    
+    const payload = {
+      fields: convertToFirestoreFields(data)
+    };
+    
+    const options = {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+    
+    Logger.log('Firestore Save Response Code: ' + responseCode);
+    Logger.log('Firestore Save Response: ' + responseText);
+    
+    if (responseCode === 200 || responseCode === 201) {
+      Logger.log('✓ Successfully saved to Firestore');
+      return JSON.parse(responseText);
+    } else {
+      Logger.log('✗ Error saving to Firestore: ' + responseText);
+      throw new Error('Firestore save failed: ' + responseText);
+    }
+  } catch (error) {
+    Logger.log('✗✗✗ Exception saving to Firestore: ' + error.toString());
+    throw error;
+  }
+}
+
 // Helper function to format answer values to readable text
 function formatAnswer(questionKey, answerValue) {
   const answerMaps = {
@@ -85,6 +186,84 @@ function formatAnswer(questionKey, answerValue) {
       'intermediate': 'Intermediate (Some knowledge)',
       'advanced': 'Advanced (Good knowledge)',
       'expert': 'Expert (Extensive knowledge)'
+    },
+    monthlyExpenses: {
+      'less_20k': 'Less than ₹20,000',
+      '20k_50k': '₹20,000 - ₹50,000',
+      '50k_1lakh': '₹50,000 - ₹1 lakh',
+      '1lakh_2lakh': '₹1 lakh - ₹2 lakhs',
+      'above_2lakh': 'Above ₹2 lakhs'
+    },
+    numDependents: {
+      '0': '0 (None)',
+      '1': '1',
+      '2': '2',
+      '3': '3',
+      '4_plus': '4 or more'
+    },
+    dependentsAgeGroup: {
+      'no_dependents': 'No dependents',
+      'all_adults': 'All adults (self-sufficient)',
+      'mix_adults_children': 'Mix of adults and children',
+      'all_children': 'All children (under 18)',
+      'elderly': 'Elderly dependents'
+    },
+    netWorth: {
+      'less_10lakhs': 'Less than ₹10 lakhs',
+      '10lakhs_25lakhs': '₹10 lakhs - ₹25 lakhs',
+      '25lakhs_50lakhs': '₹25 lakhs - ₹50 lakhs',
+      '50lakhs_1crore': '₹50 lakhs - ₹1 crore',
+      '1crore_5crore': '₹1 crore - ₹5 crores',
+      'above_5crore': 'Above ₹5 crores'
+    },
+    liquidAssetsRatio: {
+      'less_10': 'Less than 10%',
+      '10_20': '10% - 20%',
+      '20_30': '20% - 30%',
+      '30_50': '30% - 50%',
+      'above_50': 'Above 50%'
+    },
+    investmentRatio: {
+      'less_20': 'Less than 20%',
+      '20_40': '20% - 40%',
+      '40_60': '40% - 60%',
+      '60_80': '60% - 80%',
+      'above_80': 'Above 80%'
+    },
+    realEstateRatio: {
+      '0': '0% (No real estate)',
+      'less_30': 'Less than 30%',
+      '30_50': '30% - 50%',
+      '50_70': '50% - 70%',
+      'above_70': 'Above 70%'
+    },
+    debtToNetWorth: {
+      '0': '0% (No debt)',
+      'less_20': 'Less than 20%',
+      '20_40': '20% - 40%',
+      '40_60': '40% - 60%',
+      'above_60': 'Above 60%'
+    },
+    financialStability: {
+      'very_stable': 'Very stable (high savings, low debt, secure income)',
+      'stable': 'Stable (adequate savings, manageable debt)',
+      'moderate': 'Moderate (some savings, moderate debt)',
+      'unstable': 'Unstable (low savings, high debt)',
+      'very_unstable': 'Very unstable (no savings, high debt burden)'
+    },
+    investmentExperienceYears: {
+      '0': '0 years (No experience)',
+      '1_2': '1 - 2 years',
+      '3_5': '3 - 5 years',
+      '6_10': '6 - 10 years',
+      'above_10': 'Above 10 years'
+    },
+    investmentTypes: {
+      'only_safe': 'Only safe investments (FDs, Savings, PPF)',
+      'mostly_safe': 'Mostly safe with some debt funds',
+      'balanced': 'Balanced mix (Equity, Debt, Gold)',
+      'mostly_equity': 'Mostly equity (Mutual funds, stocks)',
+      'diversified': 'Highly diversified (Equity, Debt, Real Estate, Gold, Alternatives)'
     }
   };
   
@@ -99,20 +278,19 @@ function formatQuestionnaireEmail(name, answers, riskBucket, riskScore, equityAl
   const questions = [
     // Financial Information
     { key: 'annualIncome', text: '1. What is your annual income?', isNumber: false },
-    { key: 'monthlyExpenses', text: '2. What are your monthly expenses?', isNumber: true },
-    { key: 'numDependents', text: '3. How many dependents do you have?', isNumber: true },
-    { key: 'dependentsDetails', text: '4. Dependents Details', isText: true },
-    { key: 'netWorth', text: '5. What is your approximate net worth?', isNumber: true },
-    { key: 'liquidAssets', text: '6. Liquid Assets (Cash, Bank)', isNumber: true },
-    { key: 'investments', text: '7. Investments', isNumber: true },
-    { key: 'realEstate', text: '8. Real Estate', isNumber: true },
-    { key: 'otherAssets', text: '9. Other Assets', isNumber: true },
-    { key: 'liabilities', text: '10. Liabilities', isNumber: true },
+    { key: 'monthlyExpenses', text: '2. What are your monthly expenses?', isNumber: false },
+    { key: 'numDependents', text: '3. How many dependents do you have?', isNumber: false },
+    { key: 'dependentsAgeGroup', text: '4. What is the age group of your dependents?', isNumber: false },
+    { key: 'netWorth', text: '5. What is your approximate net worth?', isNumber: false },
+    { key: 'liquidAssetsRatio', text: '6. What percentage of your net worth is in liquid assets?', isNumber: false },
+    { key: 'investmentRatio', text: '7. What percentage of your net worth is in investments?', isNumber: false },
+    { key: 'realEstateRatio', text: '8. What percentage of your net worth is in real estate?', isNumber: false },
+    { key: 'debtToNetWorth', text: '9. What is your debt to net worth ratio?', isNumber: false },
+    { key: 'financialStability', text: '10. How would you describe your current financial stability?', isNumber: false },
     
     // Investment Experience
-    { key: 'investmentExperienceYears', text: '11. How many years of investment experience do you have?', isNumber: true },
-    { key: 'investmentTypes', text: '12. What types of investments have you held?', isText: true },
-    { key: 'investmentTypesOther', text: '12a. Other investment types (if specified)', isText: true, optional: true },
+    { key: 'investmentExperienceYears', text: '11. How many years of investment experience do you have?', isNumber: false },
+    { key: 'investmentTypes', text: '12. What types of investments have you primarily held?', isNumber: false },
     { key: 'knowledgeLevel', text: '13. What is your knowledge level about investments?', isNumber: false },
     
     // Risk Capacity Questions
@@ -378,8 +556,6 @@ function doPost(e) {
       }
     }
     
-    const sheet = SpreadsheetApp.getActiveSheet();
-    
     // Check if we have post data
     if (!e || !e.postData || !e.postData.contents) {
       Logger.log('✗✗✗ ERROR: No post data received');
@@ -409,35 +585,24 @@ function doPost(e) {
     // Handle discovery form submission
     if (data.type === 'discovery') {
       Logger.log('Processing discovery form submission');
-      sheet.appendRow([
-        data.name || '',
-        data.age || '',
-        data.email || '',
-        data.phone || '',
-        data.service || '',
-        '', // Annual Income (empty for now)
-        '', // Monthly Expenses (empty for now)
-        '', // Number of Dependents (empty for now)
-        '', // Dependents Details (empty for now)
-        '', // Net Worth (empty for now)
-        '', // Liquid Assets (empty for now)
-        '', // Investments (empty for now)
-        '', // Real Estate (empty for now)
-        '', // Other Assets (empty for now)
-        '', // Liabilities (empty for now)
-        '', // Investment Experience Years (empty for now)
-        '', // Investment Types (empty for now)
-        '', // Investment Types Other (empty for now)
-        '', // Knowledge Level (empty for now)
-        '', // Risk Capacity (empty for now)
-        '', // Risk Behaviour (empty for now)
-        '', // Risk Score (empty for now)
-        '', // Risk Bucket (empty for now)
-        '', // Equity Allocation (empty for now)
-        '', // Debt Allocation (empty for now)
-        '', // Alternatives Allocation (empty for now)
-        data.timestamp || new Date()
-      ]);
+      
+      const firestoreData = {
+        name: data.name || '',
+        age: data.age || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        service: data.service || '',
+        timestamp: new Date().toISOString(),
+        status: 'discovery_only' // Mark as discovery form only
+      };
+      
+      try {
+        saveToFirestore('clients', firestoreData);
+        Logger.log('✓ Discovery form data saved to Firestore');
+      } catch (firestoreError) {
+        Logger.log('✗✗✗ ERROR saving discovery form to Firestore: ' + firestoreError.toString());
+        // Continue execution even if Firestore save fails
+      }
     }
     
     // Handle risk assessment submission
@@ -446,75 +611,67 @@ function doPost(e) {
       Logger.log('Processing assessment submission');
       Logger.log('Assessment data received at: ' + new Date().toISOString());
       
-      // Find the row with matching email
-      const email = data.email;
-      Logger.log('Looking for email: ' + email);
-      const lastRow = sheet.getLastRow();
-      let rowToUpdate = null;
+      const answers = data.answers || {};
       
-      // Search for existing row with this email (starting from row 2, skipping header)
-      if (lastRow > 1) {
-        for (let i = 2; i <= lastRow; i++) {
-          const cellValue = sheet.getRange(i, 3).getValue();
-          if (cellValue && cellValue.toString().trim() === email.toString().trim()) {
-            rowToUpdate = i;
-            break;
-          }
-        }
-      }
+      // Prepare Firestore data
+      const firestoreData = {
+        name: data.name || '',
+        age: data.age || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        service: data.service || '',
+        // Financial Information
+        annualIncome: answers.annualIncome || '',
+        monthlyExpenses: answers.monthlyExpenses || '',
+        numDependents: answers.numDependents || '',
+        dependentsAgeGroup: answers.dependentsAgeGroup || '',
+        netWorth: answers.netWorth || '',
+        liquidAssetsRatio: answers.liquidAssetsRatio || '',
+        investmentRatio: answers.investmentRatio || '',
+        realEstateRatio: answers.realEstateRatio || '',
+        debtToNetWorth: answers.debtToNetWorth || '',
+        financialStability: answers.financialStability || '',
+        // Investment Experience
+        investmentExperienceYears: answers.investmentExperienceYears || '',
+        investmentTypes: answers.investmentTypes || '',
+        knowledgeLevel: answers.knowledgeLevel || '',
+        // Risk Capacity Questions
+        incomeStability: answers.incomeStability || '',
+        savingsRate: answers.savingsRate || '',
+        emergencyFund: answers.emergencyFund || '',
+        dependents: answers.dependents || '',
+        emiIncomeRatio: answers.emiIncomeRatio || '',
+        jobReplaceability: answers.jobReplaceability || '',
+        investmentDuration: answers.investmentDuration || '',
+        goalFlexibility: answers.goalFlexibility || '',
+        // Risk Behaviour Questions
+        budgetTracking: answers.budgetTracking || '',
+        investmentConsistency: answers.investmentConsistency || '',
+        marketReaction: answers.marketReaction || '',
+        portfolioMonitoring: answers.portfolioMonitoring || '',
+        // Scores
+        financialInfoScore: data.financialInfoScore || 0,
+        investmentExperienceScore: data.investmentExperienceScore || 0,
+        riskCapacity: data.riskCapacity || 0,
+        riskBehaviour: data.riskBehaviour || 0,
+        riskScore: data.riskScore || 0,
+        riskBucket: data.riskBucket || '',
+        equityAllocation: data.equityAllocation || '',
+        debtAllocation: data.debtAllocation || '',
+        alternativesAllocation: data.alternativesAllocation || '',
+        // Full answers object for reference
+        answers: answers,
+        timestamp: new Date().toISOString()
+      };
       
-      if (rowToUpdate) {
-        // Update existing row with assessment data
-        Logger.log('Updating existing row: ' + rowToUpdate);
-        sheet.getRange(rowToUpdate, 1).setValue(data.name || '');
-        sheet.getRange(rowToUpdate, 2).setValue(data.age || '');
-        sheet.getRange(rowToUpdate, 3).setValue(data.email || '');
-        sheet.getRange(rowToUpdate, 4).setValue(data.phone || '');
-        sheet.getRange(rowToUpdate, 5).setValue(data.service || '');
-        // Financial Information (columns 6-15)
-        const answers = data.answers || {};
-        sheet.getRange(rowToUpdate, 6).setValue(answers.annualIncome || '');
-        sheet.getRange(rowToUpdate, 7).setValue(answers.monthlyExpenses || '');
-        sheet.getRange(rowToUpdate, 8).setValue(answers.numDependents || '');
-        sheet.getRange(rowToUpdate, 9).setValue(answers.dependentsDetails || '');
-        sheet.getRange(rowToUpdate, 10).setValue(answers.netWorth || '');
-        sheet.getRange(rowToUpdate, 11).setValue(answers.liquidAssets || '');
-        sheet.getRange(rowToUpdate, 12).setValue(answers.investments || '');
-        sheet.getRange(rowToUpdate, 13).setValue(answers.realEstate || '');
-        sheet.getRange(rowToUpdate, 14).setValue(answers.otherAssets || '');
-        sheet.getRange(rowToUpdate, 15).setValue(answers.liabilities || '');
-        // Investment Experience (columns 16-19)
-        sheet.getRange(rowToUpdate, 16).setValue(answers.investmentExperienceYears || '');
-        sheet.getRange(rowToUpdate, 17).setValue(answers.investmentTypes || '');
-        sheet.getRange(rowToUpdate, 18).setValue(answers.investmentTypesOther || '');
-        sheet.getRange(rowToUpdate, 19).setValue(answers.knowledgeLevel || '');
-        // Risk Assessment Results (columns 20-26)
-        sheet.getRange(rowToUpdate, 20).setValue(data.riskCapacity || '');
-        sheet.getRange(rowToUpdate, 21).setValue(data.riskBehaviour || '');
-        sheet.getRange(rowToUpdate, 22).setValue(data.riskScore || '');
-        sheet.getRange(rowToUpdate, 23).setValue(data.riskBucket || '');
-        sheet.getRange(rowToUpdate, 24).setValue(data.equityAllocation || '');
-        sheet.getRange(rowToUpdate, 25).setValue(data.debtAllocation || '');
-        sheet.getRange(rowToUpdate, 26).setValue(data.alternativesAllocation || '');
-        sheet.getRange(rowToUpdate, 27).setValue(data.timestamp || new Date());
-      } else {
-        // Create new row if email not found
-        Logger.log('Creating new row');
-        sheet.appendRow([
-          data.name || '',
-          data.age || '',
-          data.email || '',
-          data.phone || '',
-          data.service || '',
-          data.riskCapacity || '',
-          data.riskBehaviour || '',
-          data.riskScore || '',
-          data.riskBucket || '',
-          data.equityAllocation || '',
-          data.debtAllocation || '',
-          data.alternativesAllocation || '',
-          data.timestamp || new Date()
-        ]);
+      // Save to Firestore
+      try {
+        Logger.log('Saving assessment data to Firestore...');
+        saveToFirestore('assessments', firestoreData);
+        Logger.log('✓ Assessment data saved to Firestore');
+      } catch (firestoreError) {
+        Logger.log('✗✗✗ ERROR saving assessment to Firestore: ' + firestoreError.toString());
+        // Continue execution even if Firestore save fails
       }
       
       // Send email copy if requested
@@ -639,6 +796,113 @@ function doPost(e) {
         if (!hasAnswers) Logger.log('  - answers is missing or empty');
       }
       Logger.log('=== EMAIL CHECK END ===');
+    }
+    
+    // Send alert email to admin when assessment is submitted
+    if (data.type === 'assessment') {
+      try {
+        Logger.log('=== SENDING ADMIN ALERT EMAIL ===');
+        const adminEmail = 'Gautamkathuria0909@gmail.com';
+        
+        const alertSubject = 'New Risk Assessment Submitted - ' + (data.name || 'Unknown User');
+        const alertBody = `
+          <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #000;">New Risk Assessment Submission</h2>
+                <p>A new risk assessment has been submitted through your website.</p>
+                
+                <h3 style="color: #000; margin-top: 20px;">Client Information:</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Name:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.name || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Email:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.email || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Phone:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.phone || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Age:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.age || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Service:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.service || 'N/A'}</td>
+                  </tr>
+                </table>
+                
+                <h3 style="color: #000; margin-top: 20px;">Assessment Results:</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Financial Info Score:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.financialInfoScore || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Investment Experience Score:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.investmentExperienceScore || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Risk Capacity:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.riskCapacity || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Risk Behaviour:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.riskBehaviour || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Final Risk Score:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.riskScore || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Risk Bucket:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.riskBucket || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Equity Allocation:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.equityAllocation || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Debt Allocation:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.debtAllocation || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Alternatives Allocation:</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">${data.alternativesAllocation || 'N/A'}</td>
+                  </tr>
+                </table>
+                
+                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+                  <strong>Submitted at:</strong> ${data.timestamp || new Date().toISOString()}
+                </p>
+                
+                <p style="margin-top: 20px;">
+                  <a href="https://console.firebase.google.com/project/${FIREBASE_PROJECT_ID}/firestore" style="background-color: #000; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    View in Firebase Console
+                  </a>
+                </p>
+              </div>
+            </body>
+          </html>
+        `;
+        
+        MailApp.sendEmail({
+          to: adminEmail,
+          subject: alertSubject,
+          htmlBody: alertBody,
+          name: 'Financial Planning Advisory - Risk Assessment System'
+        });
+        
+        Logger.log('✓ Admin alert email sent successfully to: ' + adminEmail);
+      } catch (alertError) {
+        Logger.log('✗✗✗ ERROR sending admin alert email: ' + alertError.toString());
+        Logger.log('Alert Error message: ' + alertError.message);
+        // Don't fail the whole request if alert email fails
+      }
     }
     
     Logger.log('doPost completed successfully');
