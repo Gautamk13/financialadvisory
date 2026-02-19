@@ -1,7 +1,7 @@
 // Global state
 let currentQuestion = 0;
 let personalInfo = {};
-const totalQuestions = 12;
+const totalQuestions = 25;
 
 // Google Sheets Script URL
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUkV_UN7MdOd-ArKdpnVuiQIHfNmAryzNUuKWcYA1WpGnVzKURrBCSANhpfx3-bqovIA/exec';
@@ -18,12 +18,24 @@ async function saveAssessmentToGoogleSheets(result, answers) {
         const discoveryDataStr = sessionStorage.getItem('discoveryFormData');
         const discoveryData = discoveryDataStr ? JSON.parse(discoveryDataStr) : {};
         
-        // Ensure we capture the checkbox value correctly
-        const sendCopyValue = personalInfo.sendCopy === true || personalInfo.sendCopy === 'true';
+        // Ensure we capture the checkbox value correctly - check both personalInfo and the actual checkbox element
+        let sendCopyValue = false;
+        
+        // First, try to get from personalInfo (set when form was submitted)
+        if (personalInfo.sendCopy === true || personalInfo.sendCopy === 'true') {
+            sendCopyValue = true;
+        }
+        
+        // Also check the checkbox element directly (in case it's still on the page)
+        const checkboxElement = document.getElementById('sendCopy');
+        if (checkboxElement && checkboxElement.checked) {
+            sendCopyValue = true;
+        }
         
         console.log('=== Sending Assessment Data ===');
         console.log('sendCopy checkbox value:', sendCopyValue);
         console.log('personalInfo.sendCopy:', personalInfo.sendCopy);
+        console.log('Checkbox element checked:', checkboxElement ? checkboxElement.checked : 'element not found');
         console.log('Email:', discoveryData.email || personalInfo.email || '');
         
         const dataToSave = {
@@ -52,16 +64,42 @@ async function saveAssessmentToGoogleSheets(result, answers) {
             answerKeys: Object.keys(dataToSave.answers || {})
         });
 
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dataToSave),
-            mode: 'no-cors'
-        });
+        console.log('=== ABOUT TO SEND DATA TO GOOGLE SCRIPT ===');
+        console.log('URL:', GOOGLE_SCRIPT_URL);
+        console.log('Full data being sent:', JSON.stringify(dataToSave, null, 2));
         
-        console.log('Risk assessment saved to Google Sheets');
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToSave),
+                mode: 'no-cors'
+            });
+            
+            console.log('✓ Fetch request completed');
+            console.log('Response status:', response.status);
+            console.log('Response type:', response.type);
+            
+            // Note: With 'no-cors' mode, we can't read the response, but that's okay
+            
+        } catch (fetchError) {
+            console.error('✗ ERROR in fetch request:', fetchError);
+            console.error('Error details:', fetchError.message);
+        }
+        
+        console.log('Risk assessment data sent to Google Sheets');
+        
+        // Show user a message if email was requested
+        if (sendCopyValue) {
+            console.log('✓ Email copy requested - check your inbox (and spam folder)');
+            setTimeout(() => {
+                alert('Your assessment has been saved. If you requested an email copy, please check your inbox (including spam folder).');
+            }, 1000);
+        } else {
+            console.log('⚠ Email copy NOT requested (sendCopyValue is false)');
+        }
     } catch (error) {
         console.error('Error saving assessment to Google Sheets:', error);
     }
@@ -169,13 +207,38 @@ function showQuestion(index) {
 
 function validateCurrentQuestion() {
     const activeQuestion = document.querySelector('.question.active');
-    const radioInputs = activeQuestion.querySelectorAll('input[type="radio"]');
-    const checked = Array.from(radioInputs).some(input => input.checked);
     
-    if (!checked) {
-        alert('Please select an option before proceeding.');
-        return false;
+    // Check for radio buttons (must have one selected)
+    const radioInputs = activeQuestion.querySelectorAll('input[type="radio"]');
+    if (radioInputs.length > 0) {
+        const checked = Array.from(radioInputs).some(input => input.checked);
+        if (!checked) {
+            alert('Please select an option before proceeding.');
+            return false;
+        }
     }
+    
+    // Check for required text/number inputs
+    const requiredInputs = activeQuestion.querySelectorAll('input[required], textarea[required]');
+    for (let input of requiredInputs) {
+        if (!input.value || input.value.trim() === '') {
+            alert('Please fill in all required fields before proceeding.');
+            input.focus();
+            return false;
+        }
+    }
+    
+    // Check for checkboxes (at least one must be checked if there are checkboxes)
+    const checkboxInputs = activeQuestion.querySelectorAll('input[type="checkbox"]');
+    if (checkboxInputs.length > 0 && !Array.from(checkboxInputs).some(cb => cb.checked)) {
+        // For investment types, at least one should be selected
+        const questionText = activeQuestion.querySelector('h3').textContent;
+        if (questionText.includes('types of investments')) {
+            alert('Please select at least one investment type before proceeding.');
+            return false;
+        }
+    }
+    
     return true;
 }
 
@@ -448,7 +511,29 @@ async function submitAssessment() {
     const form = document.getElementById('assessmentForm');
     const formData = new FormData(form);
     
+    // Get all checked investment types
+    const investmentTypes = formData.getAll('investmentTypes');
+    
     const answers = {
+        // Financial Information
+        annualIncome: formData.get('annualIncome'),
+        monthlyExpenses: formData.get('monthlyExpenses'),
+        numDependents: formData.get('numDependents'),
+        dependentsDetails: formData.get('dependentsDetails'),
+        netWorth: formData.get('netWorth'),
+        liquidAssets: formData.get('liquidAssets'),
+        investments: formData.get('investments'),
+        realEstate: formData.get('realEstate'),
+        otherAssets: formData.get('otherAssets'),
+        liabilities: formData.get('liabilities'),
+        
+        // Investment Experience
+        investmentExperienceYears: formData.get('investmentExperienceYears'),
+        investmentTypes: investmentTypes.join(', '), // Convert array to comma-separated string
+        investmentTypesOther: formData.get('investmentTypesOther'),
+        knowledgeLevel: formData.get('knowledgeLevel'),
+        
+        // Risk Capacity Questions
         incomeStability: formData.get('incomeStability'),
         savingsRate: formData.get('savingsRate'),
         emergencyFund: formData.get('emergencyFund'),
@@ -457,6 +542,8 @@ async function submitAssessment() {
         jobReplaceability: formData.get('jobReplaceability'),
         investmentDuration: formData.get('investmentDuration'),
         goalFlexibility: formData.get('goalFlexibility'),
+        
+        // Risk Behaviour Questions
         budgetTracking: formData.get('budgetTracking'),
         investmentConsistency: formData.get('investmentConsistency'),
         marketReaction: formData.get('marketReaction'),

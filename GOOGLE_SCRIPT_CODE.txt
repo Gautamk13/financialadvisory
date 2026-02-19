@@ -71,6 +71,20 @@ function formatAnswer(questionKey, answerValue) {
       'weekly': 'Weekly',
       'monthly': 'Monthly',
       'rarely': 'Rarely (only when needed)'
+    },
+    annualIncome: {
+      'less_5_lakhs': 'Less than ₹5 lakhs',
+      '5_10_lakhs': '₹5 lakhs - ₹10 lakhs',
+      '10_25_lakhs': '₹10 lakhs - ₹25 lakhs',
+      '25_50_lakhs': '₹25 lakhs - ₹50 lakhs',
+      '50_lakhs_1_crore': '₹50 lakhs - ₹1 crore',
+      'above_1_crore': 'Above ₹1 crore'
+    },
+    knowledgeLevel: {
+      'beginner': 'Beginner (Limited knowledge)',
+      'intermediate': 'Intermediate (Some knowledge)',
+      'advanced': 'Advanced (Good knowledge)',
+      'expert': 'Expert (Extensive knowledge)'
     }
   };
   
@@ -83,18 +97,39 @@ function formatAnswer(questionKey, answerValue) {
 // Function to format email with questionnaire and answers
 function formatQuestionnaireEmail(name, answers, riskBucket, riskScore, equityAlloc, debtAlloc, altAlloc) {
   const questions = [
-    { key: 'incomeStability', text: '1. What is your employment type?' },
-    { key: 'savingsRate', text: '2. What percentage of your monthly income do you invest/save?' },
-    { key: 'emergencyFund', text: '3. How many months of expenses do you have in your emergency fund?' },
-    { key: 'dependents', text: '4. How many dependents do you have?' },
-    { key: 'emiIncomeRatio', text: '5. What is your EMI (loan payments) to Income ratio?' },
-    { key: 'jobReplaceability', text: '6. How long would it take you to find a similar job if you lost your current one?' },
-    { key: 'investmentDuration', text: '7. What is your investment duration/horizon?' },
-    { key: 'goalFlexibility', text: '8. How flexible is your investment goal deadline?' },
-    { key: 'budgetTracking', text: '9. How do you track your budget and expenses?' },
-    { key: 'investmentConsistency', text: '10. How consistent is your investment habit (SIP/regular investments)?' },
-    { key: 'marketReaction', text: '11. What did you do during the last major market fall/crash?' },
-    { key: 'portfolioMonitoring', text: '12. How often do you check your investment portfolio?' }
+    // Financial Information
+    { key: 'annualIncome', text: '1. What is your annual income?', isNumber: false },
+    { key: 'monthlyExpenses', text: '2. What are your monthly expenses?', isNumber: true },
+    { key: 'numDependents', text: '3. How many dependents do you have?', isNumber: true },
+    { key: 'dependentsDetails', text: '4. Dependents Details', isText: true },
+    { key: 'netWorth', text: '5. What is your approximate net worth?', isNumber: true },
+    { key: 'liquidAssets', text: '6. Liquid Assets (Cash, Bank)', isNumber: true },
+    { key: 'investments', text: '7. Investments', isNumber: true },
+    { key: 'realEstate', text: '8. Real Estate', isNumber: true },
+    { key: 'otherAssets', text: '9. Other Assets', isNumber: true },
+    { key: 'liabilities', text: '10. Liabilities', isNumber: true },
+    
+    // Investment Experience
+    { key: 'investmentExperienceYears', text: '11. How many years of investment experience do you have?', isNumber: true },
+    { key: 'investmentTypes', text: '12. What types of investments have you held?', isText: true },
+    { key: 'investmentTypesOther', text: '12a. Other investment types (if specified)', isText: true, optional: true },
+    { key: 'knowledgeLevel', text: '13. What is your knowledge level about investments?', isNumber: false },
+    
+    // Risk Capacity Questions
+    { key: 'incomeStability', text: '14. What is your employment type?', isNumber: false },
+    { key: 'savingsRate', text: '15. What percentage of your monthly income do you invest/save?', isNumber: false },
+    { key: 'emergencyFund', text: '16. How many months of expenses do you have in your emergency fund?', isNumber: false },
+    { key: 'dependents', text: '17. How many dependents do you have?', isNumber: false },
+    { key: 'emiIncomeRatio', text: '18. What is your EMI (loan payments) to Income ratio?', isNumber: false },
+    { key: 'jobReplaceability', text: '19. How long would it take you to find a similar job if you lost your current one?', isNumber: false },
+    { key: 'investmentDuration', text: '20. What is your investment duration/horizon?', isNumber: false },
+    { key: 'goalFlexibility', text: '21. How flexible is your investment goal deadline?', isNumber: false },
+    
+    // Risk Behaviour Questions
+    { key: 'budgetTracking', text: '22. How do you track your budget and expenses?', isNumber: false },
+    { key: 'investmentConsistency', text: '23. How consistent is your investment habit (SIP/regular investments)?', isNumber: false },
+    { key: 'marketReaction', text: '24. What did you do during the last major market fall/crash?', isNumber: false },
+    { key: 'portfolioMonitoring', text: '25. How often do you check your investment portfolio?', isNumber: false }
   ];
   
   let html = `
@@ -105,11 +140,60 @@ function formatQuestionnaireEmail(name, answers, riskBucket, riskScore, equityAl
           <p>Dear ${name || 'Valued Client'},</p>
           <p>Thank you for completing the Risk Assessment Questionnaire. Below is a copy of your responses:</p>
           
+          <h3 style="color: #000; margin-top: 30px;">Financial Information</h3>
+  `;
+  
+  // Add Financial Information questions (1-10)
+  for (let i = 0; i < 10; i++) {
+    const q = questions[i];
+    let answer = '';
+    if (q.isNumber) {
+      answer = answers[q.key] ? '₹' + Number(answers[q.key]).toLocaleString('en-IN') : 'Not answered';
+    } else if (q.isText) {
+      answer = answers[q.key] || 'Not answered';
+    } else {
+      answer = formatAnswer(q.key, answers[q.key]);
+    }
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-left: 3px solid #000;">
+        <p style="margin: 0 0 8px 0; font-weight: bold;">${q.text}</p>
+        <p style="margin: 0; color: #555;">Answer: ${answer}</p>
+      </div>
+    `;
+  }
+  
+  html += `
+          <h3 style="color: #000; margin-top: 30px;">Investment Experience</h3>
+  `;
+  
+  // Add Investment Experience questions (11-13)
+  for (let i = 10; i < 13; i++) {
+    const q = questions[i];
+    if (q.optional && !answers[q.key]) {
+      continue; // Skip optional questions that weren't answered
+    }
+    let answer = '';
+    if (q.isNumber) {
+      answer = answers[q.key] ? answers[q.key] + ' years' : 'Not answered';
+    } else if (q.isText) {
+      answer = answers[q.key] || 'Not answered';
+    } else {
+      answer = formatAnswer(q.key, answers[q.key]);
+    }
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-left: 3px solid #000;">
+        <p style="margin: 0 0 8px 0; font-weight: bold;">${q.text}</p>
+        <p style="margin: 0; color: #555;">Answer: ${answer}</p>
+      </div>
+    `;
+  }
+  
+  html += `
           <h3 style="color: #000; margin-top: 30px;">Risk Capacity Assessment</h3>
   `;
   
-  // Add questions 1-8 (Risk Capacity)
-  for (let i = 0; i < 8; i++) {
+  // Add Risk Capacity questions (14-21)
+  for (let i = 13; i < 21; i++) {
     const q = questions[i];
     const answer = formatAnswer(q.key, answers[q.key]);
     html += `
@@ -124,8 +208,8 @@ function formatQuestionnaireEmail(name, answers, riskBucket, riskScore, equityAl
           <h3 style="color: #000; margin-top: 30px;">Risk Behaviour Assessment</h3>
   `;
   
-  // Add questions 9-12 (Risk Behaviour)
-  for (let i = 8; i < 12; i++) {
+  // Add Risk Behaviour questions (22-25)
+  for (let i = 21; i < 25; i++) {
     const q = questions[i];
     const answer = formatAnswer(q.key, answers[q.key]);
     html += `
@@ -171,25 +255,156 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// Test function to verify email sending works
+// Run this function manually in Google Apps Script to test email
+function testEmailSending() {
+  try {
+    const testEmail = 'Gautamkathuria0909@gmail.com'; // Replace with your email for testing
+    const testAnswers = {
+      incomeStability: 'large_mnc',
+      savingsRate: '20_35',
+      emergencyFund: '6_12',
+      dependents: '0',
+      emiIncomeRatio: 'less_10',
+      jobReplaceability: 'less_2_months',
+      investmentDuration: 'more_10',
+      goalFlexibility: 'fully_flexible',
+      budgetTracking: 'strict',
+      investmentConsistency: 'consistent',
+      marketReaction: 'held',
+      portfolioMonitoring: 'monthly'
+    };
+    
+    Logger.log('Testing email sending to: ' + testEmail);
+    
+    const emailBody = formatQuestionnaireEmail(
+      'Test User',
+      testAnswers,
+      'Moderate',
+      '65.5',
+      '60-70%',
+      '20-30%',
+      '5-10%'
+    );
+    
+    MailApp.sendEmail({
+      to: testEmail,
+      subject: 'TEST - Your Risk Assessment Questionnaire - Financial Planning Advisory',
+      htmlBody: emailBody,
+      name: 'Financial Planning Advisory - Gautam Kathuria'
+    });
+    
+    Logger.log('✓ Test email sent successfully!');
+    return 'Test email sent to ' + testEmail;
+  } catch (error) {
+    Logger.log('✗ Test email failed: ' + error.toString());
+    return 'Test email failed: ' + error.toString();
+  }
+}
+
+// Test function that simulates a POST request with data
+// This helps test the doPost function with actual data
+function testDoPostWithData() {
+  try {
+    Logger.log('=== Testing doPost with simulated data ===');
+    
+    // Create a mock POST event object
+    const mockData = {
+      name: 'Test User',
+      age: '25',
+      email: 'Gautamkathuria0909@gmail.com',
+      phone: '1234567890',
+      service: 'Holistic Financial Planning',
+      riskCapacity: 65.5,
+      riskBehaviour: 70.2,
+      riskScore: 67.85,
+      riskBucket: 'Moderate',
+      equityAllocation: '60-70%',
+      debtAllocation: '20-30%',
+      alternativesAllocation: '5-10%',
+      sendCopy: true, // THIS IS THE KEY - set to true
+      answers: {
+        incomeStability: 'large_mnc',
+        savingsRate: '20_35',
+        emergencyFund: '6_12',
+        dependents: '0',
+        emiIncomeRatio: 'less_10',
+        jobReplaceability: 'less_2_months',
+        investmentDuration: 'more_10',
+        goalFlexibility: 'fully_flexible',
+        budgetTracking: 'strict',
+        investmentConsistency: 'consistent',
+        marketReaction: 'held',
+        portfolioMonitoring: 'monthly'
+      },
+      type: 'assessment',
+      timestamp: new Date().toISOString()
+    };
+    
+    const mockEvent = {
+      postData: {
+        contents: JSON.stringify(mockData)
+      }
+    };
+    
+    Logger.log('Calling doPost with mock data...');
+    Logger.log('sendCopy in mock data: ' + mockData.sendCopy);
+    
+    // Call doPost with the mock event
+    const result = doPost(mockEvent);
+    
+    Logger.log('doPost result: ' + result.getContent());
+    return 'Test completed. Check logs above.';
+  } catch (error) {
+    Logger.log('✗ Test failed: ' + error.toString());
+    return 'Test failed: ' + error.toString();
+  }
+}
+
 // This function handles data from your website
 function doPost(e) {
   try {
-    Logger.log('=== doPost called ===');
+    Logger.log('========================================');
+    Logger.log('=== doPost CALLED ===');
+    Logger.log('Timestamp: ' + new Date().toISOString());
+    Logger.log('Has event object (e): ' + (e ? 'YES' : 'NO'));
     Logger.log('Has postData: ' + (e && e.postData ? 'YES' : 'NO'));
+    
+    if (e && e.postData) {
+      Logger.log('postData.contents exists: ' + (e.postData.contents ? 'YES' : 'NO'));
+      if (e.postData.contents) {
+        Logger.log('postData.contents length: ' + e.postData.contents.length + ' characters');
+        Logger.log('postData.contents preview (first 200 chars): ' + e.postData.contents.substring(0, 200));
+      }
+    }
     
     const sheet = SpreadsheetApp.getActiveSheet();
     
     // Check if we have post data
     if (!e || !e.postData || !e.postData.contents) {
-      Logger.log('✗ No post data received');
+      Logger.log('✗✗✗ ERROR: No post data received');
+      Logger.log('Event object structure: ' + JSON.stringify(Object.keys(e || {})));
       return ContentService.createTextOutput(JSON.stringify({error: 'No data received'}))
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    Logger.log('Post data received, parsing...');
-    const data = JSON.parse(e.postData.contents);
-    Logger.log('Data type: ' + data.type);
+    Logger.log('✓ Post data received, parsing JSON...');
+    let data;
+    try {
+      data = JSON.parse(e.postData.contents);
+      Logger.log('✓ JSON parsed successfully');
+    } catch (parseError) {
+      Logger.log('✗✗✗ ERROR parsing JSON: ' + parseError.toString());
+      Logger.log('Raw contents: ' + e.postData.contents);
+      return ContentService.createTextOutput(JSON.stringify({
+        error: 'JSON parse error',
+        message: parseError.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    Logger.log('Data type: ' + (data.type || 'MISSING'));
     Logger.log('Data keys: ' + Object.keys(data).join(', '));
+    Logger.log('Full data object: ' + JSON.stringify(data));
     
     // Handle discovery form submission
     if (data.type === 'discovery') {
@@ -200,6 +415,20 @@ function doPost(e) {
         data.email || '',
         data.phone || '',
         data.service || '',
+        '', // Annual Income (empty for now)
+        '', // Monthly Expenses (empty for now)
+        '', // Number of Dependents (empty for now)
+        '', // Dependents Details (empty for now)
+        '', // Net Worth (empty for now)
+        '', // Liquid Assets (empty for now)
+        '', // Investments (empty for now)
+        '', // Real Estate (empty for now)
+        '', // Other Assets (empty for now)
+        '', // Liabilities (empty for now)
+        '', // Investment Experience Years (empty for now)
+        '', // Investment Types (empty for now)
+        '', // Investment Types Other (empty for now)
+        '', // Knowledge Level (empty for now)
         '', // Risk Capacity (empty for now)
         '', // Risk Behaviour (empty for now)
         '', // Risk Score (empty for now)
@@ -213,7 +442,9 @@ function doPost(e) {
     
     // Handle risk assessment submission
     if (data.type === 'assessment') {
+      Logger.log('========================================');
       Logger.log('Processing assessment submission');
+      Logger.log('Assessment data received at: ' + new Date().toISOString());
       
       // Find the row with matching email
       const email = data.email;
@@ -240,14 +471,32 @@ function doPost(e) {
         sheet.getRange(rowToUpdate, 3).setValue(data.email || '');
         sheet.getRange(rowToUpdate, 4).setValue(data.phone || '');
         sheet.getRange(rowToUpdate, 5).setValue(data.service || '');
-        sheet.getRange(rowToUpdate, 6).setValue(data.riskCapacity || '');
-        sheet.getRange(rowToUpdate, 7).setValue(data.riskBehaviour || '');
-        sheet.getRange(rowToUpdate, 8).setValue(data.riskScore || '');
-        sheet.getRange(rowToUpdate, 9).setValue(data.riskBucket || '');
-        sheet.getRange(rowToUpdate, 10).setValue(data.equityAllocation || '');
-        sheet.getRange(rowToUpdate, 11).setValue(data.debtAllocation || '');
-        sheet.getRange(rowToUpdate, 12).setValue(data.alternativesAllocation || '');
-        sheet.getRange(rowToUpdate, 13).setValue(data.timestamp || new Date());
+        // Financial Information (columns 6-15)
+        const answers = data.answers || {};
+        sheet.getRange(rowToUpdate, 6).setValue(answers.annualIncome || '');
+        sheet.getRange(rowToUpdate, 7).setValue(answers.monthlyExpenses || '');
+        sheet.getRange(rowToUpdate, 8).setValue(answers.numDependents || '');
+        sheet.getRange(rowToUpdate, 9).setValue(answers.dependentsDetails || '');
+        sheet.getRange(rowToUpdate, 10).setValue(answers.netWorth || '');
+        sheet.getRange(rowToUpdate, 11).setValue(answers.liquidAssets || '');
+        sheet.getRange(rowToUpdate, 12).setValue(answers.investments || '');
+        sheet.getRange(rowToUpdate, 13).setValue(answers.realEstate || '');
+        sheet.getRange(rowToUpdate, 14).setValue(answers.otherAssets || '');
+        sheet.getRange(rowToUpdate, 15).setValue(answers.liabilities || '');
+        // Investment Experience (columns 16-19)
+        sheet.getRange(rowToUpdate, 16).setValue(answers.investmentExperienceYears || '');
+        sheet.getRange(rowToUpdate, 17).setValue(answers.investmentTypes || '');
+        sheet.getRange(rowToUpdate, 18).setValue(answers.investmentTypesOther || '');
+        sheet.getRange(rowToUpdate, 19).setValue(answers.knowledgeLevel || '');
+        // Risk Assessment Results (columns 20-26)
+        sheet.getRange(rowToUpdate, 20).setValue(data.riskCapacity || '');
+        sheet.getRange(rowToUpdate, 21).setValue(data.riskBehaviour || '');
+        sheet.getRange(rowToUpdate, 22).setValue(data.riskScore || '');
+        sheet.getRange(rowToUpdate, 23).setValue(data.riskBucket || '');
+        sheet.getRange(rowToUpdate, 24).setValue(data.equityAllocation || '');
+        sheet.getRange(rowToUpdate, 25).setValue(data.debtAllocation || '');
+        sheet.getRange(rowToUpdate, 26).setValue(data.alternativesAllocation || '');
+        sheet.getRange(rowToUpdate, 27).setValue(data.timestamp || new Date());
       } else {
         // Create new row if email not found
         Logger.log('Creating new row');
@@ -270,14 +519,61 @@ function doPost(e) {
       
       // Send email copy if requested
       Logger.log('=== EMAIL CHECK START ===');
-      Logger.log('sendCopy value: ' + data.sendCopy + ' (type: ' + typeof data.sendCopy + ')');
-      Logger.log('email value: ' + data.email);
-      Logger.log('answers present: ' + (data.answers ? 'YES' : 'NO'));
+      Logger.log('Raw data.sendCopy value: ' + data.sendCopy + ' (type: ' + typeof data.sendCopy + ')');
+      Logger.log('Raw data.email value: ' + data.email);
+      Logger.log('Raw data.answers present: ' + (data.answers ? 'YES' : 'NO'));
       if (data.answers) {
         Logger.log('answers keys: ' + Object.keys(data.answers).join(', '));
+        Logger.log('answers count: ' + Object.keys(data.answers).length);
       }
       
-      if (data.sendCopy && data.email && data.answers) {
+      // Check conditions more explicitly - handle all possible true values
+      const sendCopyValue = data.sendCopy;
+      const shouldSendEmail = sendCopyValue === true || 
+                             sendCopyValue === 'true' || 
+                             sendCopyValue === 1 || 
+                             sendCopyValue === '1' ||
+                             String(sendCopyValue).toLowerCase() === 'true';
+      const hasEmail = data.email && String(data.email).trim() !== '';
+      const hasAnswers = data.answers && typeof data.answers === 'object' && Object.keys(data.answers).length > 0;
+      
+      Logger.log('Email conditions check:');
+      Logger.log('  shouldSendEmail: ' + shouldSendEmail + ' (sendCopy raw: ' + sendCopyValue + ', type: ' + typeof sendCopyValue + ')');
+      Logger.log('  hasEmail: ' + hasEmail + ' (email: ' + data.email + ')');
+      Logger.log('  hasAnswers: ' + hasAnswers + ' (answers is object: ' + (typeof data.answers === 'object') + ')');
+      
+      // TEMPORARY DEBUG: Send email if we have email and answers (regardless of checkbox)
+      // This helps verify the email sending works. Remove this after testing.
+      if (hasEmail && hasAnswers) {
+        Logger.log('DEBUG MODE: Sending email regardless of checkbox (sendCopy was: ' + sendCopyValue + ')');
+        try {
+          Logger.log('✓ DEBUG: Attempting to send email to: ' + data.email);
+          
+          const emailBody = formatQuestionnaireEmail(
+            data.name, 
+            data.answers, 
+            data.riskBucket, 
+            data.riskScore, 
+            data.equityAllocation, 
+            data.debtAllocation, 
+            data.alternativesAllocation
+          );
+          
+          MailApp.sendEmail({
+            to: data.email,
+            subject: 'Your Risk Assessment Questionnaire - Financial Planning Advisory',
+            htmlBody: emailBody,
+            name: 'Financial Planning Advisory - Gautam Kathuria'
+          });
+          
+          Logger.log('✓✓✓ DEBUG: Email sent successfully to: ' + data.email);
+        } catch (emailError) {
+          Logger.log('✗✗✗ DEBUG: ERROR sending email: ' + emailError.toString());
+        }
+      }
+      
+      // Normal check (with checkbox requirement)
+      if (shouldSendEmail && hasEmail && hasAnswers) {
         try {
           Logger.log('✓ All conditions met! Attempting to send email to: ' + data.email);
           
@@ -333,13 +629,14 @@ function doPost(e) {
             Logger.log('✓✓✓ Email sent successfully using GmailApp fallback to: ' + data.email);
           } catch (gmailError) {
             Logger.log('✗✗✗ GmailApp fallback also failed: ' + gmailError.toString());
+            Logger.log('GmailApp error message: ' + gmailError.message);
           }
         }
       } else {
         Logger.log('✗ Email NOT sent. Missing conditions:');
-        if (!data.sendCopy) Logger.log('  - sendCopy is false or missing (value: ' + data.sendCopy + ')');
-        if (!data.email) Logger.log('  - email is missing');
-        if (!data.answers) Logger.log('  - answers is missing');
+        if (!shouldSendEmail) Logger.log('  - sendCopy is false or missing (value: ' + data.sendCopy + ', type: ' + typeof data.sendCopy + ')');
+        if (!hasEmail) Logger.log('  - email is missing or empty');
+        if (!hasAnswers) Logger.log('  - answers is missing or empty');
       }
       Logger.log('=== EMAIL CHECK END ===');
     }

@@ -48,17 +48,220 @@
                 <div class="progress-fill" id="progressFill"></div>
             </div>
             <div class="progress-text">
-                <span id="currentQuestion">0</span> / <span id="totalQuestions">13</span>
+                <span id="currentQuestion">0</span> / <span id="totalQuestions">25</span>
             </div>
 
             <form id="assessmentForm">
+                <!-- Financial Information Section -->
+                <div class="question-group" data-category="financial-info">
+                    <h2>Financial Information</h2>
+                    <p class="section-description">Your current financial situation</p>
+
+                    <!-- Q1: Annual Income -->
+                    <div class="question" data-q="1">
+                        <h3>1. What is your annual income?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="less_5_lakhs" required>
+                                <span>Less than ₹5 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="5_10_lakhs" required>
+                                <span>₹5 lakhs - ₹10 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="10_25_lakhs" required>
+                                <span>₹10 lakhs - ₹25 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="25_50_lakhs" required>
+                                <span>₹25 lakhs - ₹50 lakhs</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="50_lakhs_1_crore" required>
+                                <span>₹50 lakhs - ₹1 crore</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="annualIncome" value="above_1_crore" required>
+                                <span>Above ₹1 crore</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Q2: Monthly Expenses -->
+                    <div class="question" data-q="2">
+                        <h3>2. What are your monthly expenses?</h3>
+                        <div class="form-group">
+                            <label for="monthlyExpenses">Monthly Expenses (₹) *</label>
+                            <input type="number" id="monthlyExpenses" name="monthlyExpenses" min="0" step="1000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q3: Number of Dependents -->
+                    <div class="question" data-q="3">
+                        <h3>3. How many dependents do you have?</h3>
+                        <div class="form-group">
+                            <label for="numDependents">Number of Dependents *</label>
+                            <input type="number" id="numDependents" name="numDependents" min="0" required>
+                        </div>
+                    </div>
+
+                    <!-- Q4: Dependents Details -->
+                    <div class="question" data-q="4">
+                        <h3>4. Dependents Details</h3>
+                        <div class="form-group">
+                            <label for="dependentsDetails">Please list your dependents and their ages (e.g., Spouse: 30, Child 1: 5, Child 2: 3) *</label>
+                            <textarea id="dependentsDetails" name="dependentsDetails" rows="4" required placeholder="Example: Spouse: 30 years, Child 1: 5 years, Child 2: 3 years"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Q5: Net Worth -->
+                    <div class="question" data-q="5">
+                        <h3>5. What is your approximate net worth?</h3>
+                        <div class="form-group">
+                            <label for="netWorth">Net Worth (₹) *</label>
+                            <input type="number" id="netWorth" name="netWorth" min="0" step="10000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q6: Liquid Assets -->
+                    <div class="question" data-q="6">
+                        <h3>6. Net Worth Components - Liquid Assets (Cash, Bank)</h3>
+                        <div class="form-group">
+                            <label for="liquidAssets">Liquid Assets (₹) *</label>
+                            <input type="number" id="liquidAssets" name="liquidAssets" min="0" step="10000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q7: Investments -->
+                    <div class="question" data-q="7">
+                        <h3>7. Net Worth Components - Investments</h3>
+                        <div class="form-group">
+                            <label for="investments">Investments (₹) *</label>
+                            <input type="number" id="investments" name="investments" min="0" step="10000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q8: Real Estate -->
+                    <div class="question" data-q="8">
+                        <h3>8. Net Worth Components - Real Estate</h3>
+                        <div class="form-group">
+                            <label for="realEstate">Real Estate (₹) *</label>
+                            <input type="number" id="realEstate" name="realEstate" min="0" step="10000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q9: Other Assets -->
+                    <div class="question" data-q="9">
+                        <h3>9. Net Worth Components - Other Assets</h3>
+                        <div class="form-group">
+                            <label for="otherAssets">Other Assets (₹) *</label>
+                            <input type="number" id="otherAssets" name="otherAssets" min="0" step="10000" required>
+                        </div>
+                    </div>
+
+                    <!-- Q10: Liabilities -->
+                    <div class="question" data-q="10">
+                        <h3>10. Net Worth Components - Liabilities</h3>
+                        <div class="form-group">
+                            <label for="liabilities">Liabilities (₹) *</label>
+                            <input type="number" id="liabilities" name="liabilities" min="0" step="10000" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investment Experience Section -->
+                <div class="question-group" data-category="investment-experience">
+                    <h2>Investment Experience</h2>
+                    <p class="section-description">Your investment background and knowledge</p>
+
+                    <!-- Q11: Years of Investment Experience -->
+                    <div class="question" data-q="11">
+                        <h3>11. How many years of investment experience do you have?</h3>
+                        <div class="form-group">
+                            <label for="investmentExperienceYears">Years of Investment Experience *</label>
+                            <input type="number" id="investmentExperienceYears" name="investmentExperienceYears" min="0" max="50" required>
+                        </div>
+                    </div>
+
+                    <!-- Q12: Types of Investments -->
+                    <div class="question" data-q="12">
+                        <h3>12. What types of investments have you held? (Select all applicable)</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="fixed_deposits">
+                                <span>Fixed Deposits / Savings Accounts</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="mutual_funds_equity">
+                                <span>Mutual Funds (Equity)</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="mutual_funds_debt">
+                                <span>Mutual Funds (Debt)</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="direct_equity">
+                                <span>Direct Equity / Stocks</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="bonds_debentures">
+                                <span>Bonds / Debentures</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="real_estate">
+                                <span>Real Estate</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="gold_precious_metals">
+                                <span>Gold / Precious Metals</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="insurance_products">
+                                <span>Insurance Products</span>
+                            </label>
+                            <label class="option">
+                                <input type="checkbox" name="investmentTypes" value="other">
+                                <span>Other</span>
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="investmentTypesOther">If "Other", please specify:</label>
+                            <input type="text" id="investmentTypesOther" name="investmentTypesOther" placeholder="Specify other investment types">
+                        </div>
+                    </div>
+
+                    <!-- Q13: Knowledge Level -->
+                    <div class="question" data-q="13">
+                        <h3>13. What is your knowledge level about investments?</h3>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="knowledgeLevel" value="beginner" required>
+                                <span>Beginner (Limited knowledge)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="knowledgeLevel" value="intermediate" required>
+                                <span>Intermediate (Some knowledge)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="knowledgeLevel" value="advanced" required>
+                                <span>Advanced (Good knowledge)</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="knowledgeLevel" value="expert" required>
+                                <span>Expert (Extensive knowledge)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Risk Capacity Questions -->
                 <div class="question-group" data-category="risk-capacity">
                     <h2>Risk Capacity Assessment</h2>
                     <p class="section-description">Financial ability to withstand volatility</p>
 
-                    <!-- Q1: Income Stability -->
-                    <div class="question" data-q="1">
+                    <!-- Q14: Income Stability -->
+                    <div class="question" data-q="14">
                         <h3>1. What is your employment type?</h3>
                         <div class="options">
                             <label class="option">
@@ -84,8 +287,8 @@
                         </div>
                     </div>
 
-                    <!-- Q2: Savings Rate -->
-                    <div class="question" data-q="2">
+                    <!-- Q15: Savings Rate -->
+                    <div class="question" data-q="15">
                         <h3>2. What percentage of your monthly income do you invest/save?</h3>
                         <div class="options">
                             <label class="option">
@@ -107,8 +310,8 @@
                         </div>
                     </div>
 
-                    <!-- Q3: Emergency Fund -->
-                    <div class="question" data-q="3">
+                    <!-- Q16: Emergency Fund -->
+                    <div class="question" data-q="16">
                         <h3>3. How many months of expenses do you have in your emergency fund?</h3>
                         <div class="options">
                             <label class="option">
@@ -130,8 +333,8 @@
                         </div>
                     </div>
 
-                    <!-- Q4: Dependents -->
-                    <div class="question" data-q="4">
+                    <!-- Q17: Dependents -->
+                    <div class="question" data-q="17">
                         <h3>4. How many dependents do you have?</h3>
                         <div class="options">
                             <label class="option">
@@ -153,8 +356,8 @@
                         </div>
                     </div>
 
-                    <!-- Q5: EMI/Income Ratio -->
-                    <div class="question" data-q="5">
+                    <!-- Q18: EMI/Income Ratio -->
+                    <div class="question" data-q="18">
                         <h3>5. What is your EMI (loan payments) to Income ratio?</h3>
                         <div class="options">
                             <label class="option">
@@ -176,8 +379,8 @@
                         </div>
                     </div>
 
-                    <!-- Q6: Job Replaceability -->
-                    <div class="question" data-q="6">
+                    <!-- Q19: Job Replaceability -->
+                    <div class="question" data-q="19">
                         <h3>6. How long would it take you to find a similar job if you lost your current one?</h3>
                         <div class="options">
                             <label class="option">
@@ -195,8 +398,8 @@
                         </div>
                     </div>
 
-                    <!-- Q7: Investment Duration -->
-                    <div class="question" data-q="7">
+                    <!-- Q20: Investment Duration -->
+                    <div class="question" data-q="20">
                         <h3>7. What is your investment duration/horizon?</h3>
                         <div class="options">
                             <label class="option">
@@ -218,8 +421,8 @@
                         </div>
                     </div>
 
-                    <!-- Q8: Goal Flexibility -->
-                    <div class="question" data-q="8">
+                    <!-- Q21: Goal Flexibility -->
+                    <div class="question" data-q="21">
                         <h3>8. How flexible is your investment goal deadline?</h3>
                         <div class="options">
                             <label class="option">
@@ -243,8 +446,8 @@
                     <h2>Risk Behaviour Assessment</h2>
                     <p class="section-description">Observed investment discipline and behavior</p>
 
-                    <!-- Q9: Budget Tracking -->
-                    <div class="question" data-q="9">
+                    <!-- Q22: Budget Tracking -->
+                    <div class="question" data-q="22">
                         <h3>9. How do you track your budget and expenses?</h3>
                         <div class="options">
                             <label class="option">
@@ -262,8 +465,8 @@
                         </div>
                     </div>
 
-                    <!-- Q10: Investment Consistency -->
-                    <div class="question" data-q="10">
+                    <!-- Q23: Investment Consistency -->
+                    <div class="question" data-q="23">
                         <h3>10. How consistent is your investment habit (SIP/regular investments)?</h3>
                         <div class="options">
                             <label class="option">
@@ -281,8 +484,8 @@
                         </div>
                     </div>
 
-                    <!-- Q11: Market Reaction -->
-                    <div class="question" data-q="11">
+                    <!-- Q24: Market Reaction -->
+                    <div class="question" data-q="24">
                         <h3>11. What did you do during the last major market fall/crash?</h3>
                         <div class="options">
                             <label class="option">
@@ -300,8 +503,8 @@
                         </div>
                     </div>
 
-                    <!-- Q12: Portfolio Monitoring -->
-                    <div class="question" data-q="12">
+                    <!-- Q25: Portfolio Monitoring -->
+                    <div class="question" data-q="25">
                         <h3>12. How often do you check your investment portfolio?</h3>
                         <div class="options">
                             <label class="option">
