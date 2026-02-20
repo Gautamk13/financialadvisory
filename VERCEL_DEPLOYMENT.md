@@ -98,3 +98,4 @@ After deployment, test:
 3. Check Firebase Console for data
 4. Verify email alerts are working
 
+

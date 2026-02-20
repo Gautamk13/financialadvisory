@@ -8,3 +8,4 @@ export const firebaseConfig = {
   privateKey: '-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n'
 };
 
+
